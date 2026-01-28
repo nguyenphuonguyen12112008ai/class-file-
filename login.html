@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đăng nhập - HealthyLife</title>
+    <meta
+      name="description"
+      content="Đăng nhập vào HealthyLife - Hệ thống chăm sóc sức khỏe toàn diện"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <style>
+      * {
+        font-family: 'Inter', sans-serif;
+      }
+
+      body {
+        transition: all 0.5s ease;
+        overflow-x: hidden;
+      }
+
+      .auth-gradient {
+        background: linear-gradient(
+          135deg,
+          #667eea 0%,
+          #764ba2 50%,
+          #f093fb 100%
+        );
+        background-size: 200% 200%;
+        animation: gradientShift 8s ease infinite;
+      }
+
+      @keyframes gradientShift {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+
+      .glass-effect {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 12px 20px;
+        border-radius: 8px;
+        color: white;
+        z-index: 10001;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+      }
+
+      .toast.show {
+        transform: translateX(0);
+      }
+
+      .toast.success {
+        background: #10b981;
+      }
+
+      .toast.error {
+        background: #ef4444;
+      }
+
+      .toast.warning {
+        background: #f59e0b;
+      }
+
+      .toast.info {
+        background: #3b82f6;
+      }
+    </style>
+  </head>
+  <body
+    class="bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 font-inter transition-colors duration-500 min-h-screen flex items-center justify-center auth-gradient"
+  >
+    <div class="container mx-auto px-4 py-8">
+      <div class="max-w-md mx-auto">
+        <!-- Back to Home -->
+        <a
+          href="index.html"
+          class="inline-flex items-center text-white/80 hover:text-white mb-8 transition-colors"
+        >
+          <i class="fas fa-arrow-left mr-2"></i>
+          Quay lại trang chủ
+        </a>
+
+        <!-- Login Card -->
+        <div class="glass-effect rounded-3xl p-8 shadow-2xl">
+          <!-- Logo -->
+          <div class="text-center mb-8">
+            <div class="flex items-center justify-center space-x-3 mb-4">
+              <div
+                class="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center"
+              >
+                <i class="fas fa-heart text-white text-xl"></i>
+              </div>
+              <span class="text-2xl font-bold text-white">HealthyLife</span>
+            </div>
+            <h1 class="text-3xl font-bold text-white mb-2">Đăng nhập</h1>
+            <p class="text-white/80">
+              Chào mừng trở lại! Vui lòng đăng nhập để tiếp tục
+            </p>
+          </div>
+
+          <!-- Login Form -->
+          <form id="login-form">
+            <div class="mb-4">
+              <label class="block text-white mb-2" for="login-email"
+                >Email</label
+              >
+              <input
+                type="email"
+                id="login-email"
+                class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-white/50 text-white placeholder-white/60"
+                placeholder="nhập email của bạn"
+                required
+              />
+            </div>
+            <div class="mb-6">
+              <label class="block text-white mb-2" for="login-password"
+                >Mật khẩu</label
+              >
+              <input
+                type="password"
+                id="login-password"
+                class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-white/50 text-white placeholder-white/60"
+                placeholder="nhập mật khẩu"
+                required
+              />
+            </div>
+            <button
+              type="submit"
+              class="w-full bg-white text-primary-600 py-4 rounded-xl font-bold hover:bg-gray-100 transition-colors mb-4"
+            >
+              Đăng nhập
+            </button>
+          </form>
+
+          <!-- Divider -->
+          <div class="my-6 flex items-center justify-center">
+            <span class="border-b border-white/20 w-1/4"></span>
+            <span class="mx-4 text-xs font-medium text-white/60 uppercase"
+              >hoặc</span
+            >
+            <span class="border-b border-white/20 w-1/4"></span>
+          </div>
+
+          <!-- Demo Login Buttons -->
+          <div class="space-y-3">
+            <button
+              id="demo-user-btn"
+              class="w-full bg-white/10 text-white py-3 rounded-xl font-semibold hover:bg-white/20 transition-colors border border-white/20"
+            >
+              <i class="fas fa-user mr-2"></i>
+              Đăng nhập Demo (Người dùng)
+            </button>
+            <button
+              id="demo-premium-btn"
+              class="w-full bg-yellow-500/20 text-yellow-300 py-3 rounded-xl font-semibold hover:bg-yellow-500/30 transition-colors border border-yellow-500/30"
+            >
+              <i class="fas fa-crown mr-2"></i>
+              Đăng nhập Demo (Premium)
+            </button>
+          </div>
+
+          <!-- Register Link -->
+          <div class="text-center mt-6">
+            <p class="text-white/70">
+              Chưa có tài khoản?
+              <a
+                href="register.html"
+                class="text-white font-semibold hover:underline ml-1"
+                >Đăng ký ngay</a
+              >
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+    <script>
+      // JSONBin Configuration
+      const JSONBIN_BIN_ID = '68df85f8ae596e708f0477af';
+      const JSONBIN_API_KEY =
+        '$2a$10$BFFIrLzJK.fmtxlLv1RdsOQgIvEHm65aHoXKONtACPq3evtCrKVMK';
+      const JSONBIN_BASE_URL = 'https://api.jsonbin.io/v3/b';
+
+      // Utility Functions
+      function showNotification(message, type = 'info') {
+        const toastContainer = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type} show`;
+        toast.textContent = message;
+
+        toastContainer.appendChild(toast);
+
+        setTimeout(() => {
+          toast.classList.remove('show');
+          setTimeout(() => {
+            toastContainer.removeChild(toast);
+          }, 300);
+        }, 4000);
+      }
+
+      // JSONBin API functions
+      async function getUserData() {
+        try {
+          const response = await fetch(
+            `${JSONBIN_BASE_URL}/${JSONBIN_BIN_ID}/latest`,
+            {
+              method: 'GET',
+              headers: {
+                'X-Master-Key': JSONBIN_API_KEY,
+              },
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error('Failed to fetch user data');
+          }
+
+          const result = await response.json();
+          return result.record;
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+          throw error;
+        }
+      }
+
+      async function saveUserData(userData) {
+        try {
+          const response = await fetch(
+            `${JSONBIN_BASE_URL}/${JSONBIN_BIN_ID}`,
+            {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-Master-Key': JSONBIN_API_KEY,
+                'X-Bin-Name': 'HealthyLife Users',
+              },
+              body: JSON.stringify({
+                ...userData,
+                lastUpdated: new Date().toISOString(),
+              }),
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error('Failed to save user data');
+          }
+
+          const result = await response.json();
+          return result;
+        } catch (error) {
+          console.error('Error saving user data:', error);
+          throw error;
+        }
+      }
+
+      // Demo user data
+      const demoUsers = {
+        user: {
+          userId: 'demo_user_001',
+          name: 'Nguyễn Văn A',
+          email: 'user@demo.com',
+          isLoggedIn: true,
+          plan: 'basic',
+          profile: {
+            age: 28,
+            gender: 'Nam',
+            height: 175,
+            weight: 70,
+            goal: 'Giảm cân',
+            activity: 'Văn phòng',
+          },
+          nutrition: {
+            plan: 'Giảm cân 1500 calo',
+            status: 'Thực đơn cá nhân hóa theo mục tiêu giảm cân',
+          },
+          workout: {
+            plan: 'Tập luyện giảm mỡ (3 buổi/tuần)',
+            status: 'Lịch tập trung vào Cardio và tạ toàn thân',
+          },
+          progress: {
+            status: 'Theo dõi cân nặng và BMI hàng tuần',
+            metrics: {
+              weight: 70,
+              bmi: 22.9,
+              progress: 'Đang cải thiện',
+            },
+          },
+        },
+        premium: {
+          userId: 'demo_premium_001',
+          name: 'Trần Thị B',
+          email: 'premium@demo.com',
+          isLoggedIn: true,
+          plan: 'premium',
+          profile: {
+            age: 32,
+            gender: 'Nữ',
+            height: 165,
+            weight: 58,
+            goal: 'Tăng cơ giảm mỡ',
+            activity: 'Tập luyện thường xuyên',
+          },
+          nutrition: {
+            plan: 'Tăng cơ 2000 calo',
+            status: 'Thực đơn Premium với đa dạng dinh dưỡng',
+          },
+          workout: {
+            plan: 'Tập luyện nâng cao (5 buổi/tuần)',
+            status: 'Lịch tập Premium với bài tập chuyên sâu',
+          },
+          progress: {
+            status: 'Theo dõi toàn diện với AI phân tích',
+            metrics: {
+              weight: 58,
+              bmi: 21.3,
+              progress: 'Xuất sắc',
+            },
+          },
+        },
+      };
+
+      // Login function
+      async function handleLogin(userData) {
+        try {
+          // Save to localStorage
+          localStorage.setItem('healthylife_user', JSON.stringify(userData));
+
+          // Save to JSONBin
+          const allUsers = await getUserData();
+          const updatedUsers = {
+            ...allUsers,
+            [userData.userId]: userData,
+          };
+          await saveUserData(updatedUsers);
+
+          showNotification('Đăng nhập thành công!', 'success');
+
+          // Redirect to dashboard after 1 second
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 1000);
+        } catch (error) {
+          console.error('Login error:', error);
+          showNotification('Có lỗi xảy ra khi đăng nhập', 'error');
+        }
+      }
+
+      // Event listeners
+      document.addEventListener('DOMContentLoaded', () => {
+        // Login form
+        document
+          .getElementById('login-form')
+          .addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            // Simple validation
+            if (!email || !password) {
+              showNotification('Vui lòng điền đầy đủ thông tin', 'warning');
+              return;
+            }
+
+            // For demo purposes, we'll use a simple check
+            // In a real app, you'd verify against your backend
+            const userData = {
+              userId: 'user_' + Date.now(),
+              name: email.split('@')[0],
+              email: email,
+              isLoggedIn: true,
+              plan: 'basic',
+              profile: {
+                age: 30,
+                gender: 'Không xác định',
+                height: 170,
+                weight: 65,
+                goal: 'Cải thiện sức khỏe',
+                activity: 'Trung bình',
+              },
+              nutrition: {
+                plan: 'Kế hoạch dinh dưỡng cơ bản',
+                status: 'Đang thiết lập...',
+              },
+              workout: {
+                plan: 'Lịch tập cơ bản',
+                status: 'Đang thiết lập...',
+              },
+              progress: {
+                status: 'Bắt đầu theo dõi',
+                metrics: {
+                  weight: 65,
+                  bmi: 22.5,
+                  progress: 'Mới bắt đầu',
+                },
+              },
+            };
+
+            await handleLogin(userData);
+          });
+
+        // Demo user login
+        document
+          .getElementById('demo-user-btn')
+          .addEventListener('click', async () => {
+            await handleLogin(demoUsers.user);
+          });
+
+        // Demo premium login
+        document
+          .getElementById('demo-premium-btn')
+          .addEventListener('click', async () => {
+            await handleLogin(demoUsers.premium);
+          });
+      });
+    </script>
+  </body>
+</html>

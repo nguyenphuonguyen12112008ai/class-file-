@@ -1,0 +1,3520 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HealthyLife - Hệ thống Sức khỏe Toàn diện</title>
+    <meta
+      name="description"
+      content="HealthyLife - Nền tảng chăm sóc sức khỏe toàn diện với AI Gemini. Tính BMI, dinh dưỡng và tập luyện cá nhân hóa."
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              primary: {
+                50: '#f0f9ff',
+                100: '#e0f2fe',
+                200: '#bae6fd',
+                300: '#7dd3fc',
+                400: '#38bdf8',
+                500: '#0ea5e9',
+                600: '#0284c7',
+                700: '#0369a1',
+                800: '#075985',
+                900: '#0c4a6e',
+              },
+              secondary: {
+                50: '#fdf4ff',
+                100: '#fae8ff',
+                200: '#f5d0fe',
+                300: '#f0abfc',
+                400: '#e879f9',
+                500: '#d946ef',
+                600: '#c026d3',
+                700: '#a21caf',
+                800: '#86198f',
+                900: '#701a75',
+              },
+            },
+            fontFamily: {
+              inter: ['Inter', 'sans-serif'],
+            },
+            animation: {
+              'fade-in': 'fadeIn 0.8s ease-in-out',
+              'slide-up': 'slideUp 0.8s ease-out',
+              'slide-down': 'slideDown 0.8s ease-out',
+              float: 'float 6s ease-in-out infinite',
+              'pulse-glow': 'pulseGlow 2s ease-in-out infinite',
+              'gradient-shift': 'gradientShift 8s ease infinite',
+              parallax: 'parallax 20s linear infinite',
+            },
+            keyframes: {
+              fadeIn: { from: { opacity: 0 }, to: { opacity: 1 } },
+              slideUp: {
+                from: { opacity: 0, transform: 'translateY(40px)' },
+                to: { opacity: 1, transform: 'translateY(0)' },
+              },
+              slideDown: {
+                from: { opacity: 0, transform: 'translateY(-40px)' },
+                to: { opacity: 1, transform: 'translateY(0)' },
+              },
+              float: {
+                '0%, 100%': { transform: 'translateY(0px) rotate(0deg)' },
+                '50%': { transform: 'translateY(-20px) rotate(5deg)' },
+              },
+              pulseGlow: {
+                '0%, 100%': { boxShadow: '0 0 20px rgba(102, 126, 234, 0.4)' },
+                '50%': { boxShadow: '0 0 40px rgba(102, 126, 234, 0.8)' },
+              },
+              gradientShift: {
+                '0%': { backgroundPosition: '0% 50%' },
+                '50%': { backgroundPosition: '100% 50%' },
+                '100%': { backgroundPosition: '0% 50%' },
+              },
+              parallax: {
+                '0%': { transform: 'translateY(0px)' },
+                '50%': { transform: 'translateY(-20px)' },
+                '100%': { transform: 'translateY(0px)' },
+              },
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      * {
+        font-family: 'Inter', sans-serif;
+      }
+
+      body {
+        transition: all 0.5s ease;
+        overflow-x: hidden;
+        scroll-behavior: smooth;
+      }
+
+      .hero-gradient {
+        background: linear-gradient(
+          135deg,
+          #667eea 0%,
+          #764ba2 50%,
+          #f093fb 100%
+        );
+        background-size: 200% 200%;
+        animation: gradientShift 8s ease infinite;
+      }
+
+      .glass-effect {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .card-hover {
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+
+      .card-hover:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      }
+
+      .btn-glow {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .btn-glow:hover {
+        transform: translateY(-2px);
+        animation: pulseGlow 1.5s ease-in-out infinite;
+      }
+
+      .btn-glow::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.2),
+          transparent
+        );
+        transition: 0.5s;
+      }
+
+      .btn-glow:hover::before {
+        left: 100%;
+      }
+
+      .floating-element {
+        animation: float 6s ease-in-out infinite;
+      }
+
+      .floating-element:nth-child(2) {
+        animation-delay: 2s;
+      }
+
+      .floating-element:nth-child(3) {
+        animation-delay: 4s;
+      }
+
+      .text-glow {
+        text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+      }
+
+      .feature-icon {
+        transition: all 0.3s ease;
+      }
+
+      .feature-card:hover .feature-icon {
+        transform: scale(1.2) rotate(10deg);
+      }
+
+      .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      .user-menu {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        padding: 10px 0;
+        min-width: 200px;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: all 0.3s ease;
+      }
+
+      .user-menu.active {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+      }
+
+      .dark .user-menu {
+        background: #1f2937;
+        color: white;
+      }
+
+      .user-menu-item {
+        padding: 10px 20px;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+
+      .user-menu-item:hover {
+        background: #f3f4f6;
+      }
+
+      .dark .user-menu-item:hover {
+        background: #374151;
+      }
+
+      .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+      }
+
+      .modal.active {
+        display: flex;
+      }
+
+      .modal-content {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        width: 90%;
+        max-width: 500px;
+        transform: scale(0.9);
+        opacity: 0;
+        transition: all 0.3s ease;
+        position: relative;
+      }
+
+      .modal.active .modal-content {
+        transform: scale(1);
+        opacity: 1;
+      }
+
+      .dark .modal-content {
+        background: #1f2937;
+        color: white;
+      }
+
+      .loader {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #0ea5e9;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        animation: spin 1s linear infinite;
+        display: inline-block;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 12px 20px;
+        border-radius: 8px;
+        color: white;
+        z-index: 10001;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+      }
+
+      .toast.show {
+        transform: translateX(0);
+      }
+
+      .toast.success {
+        background: #10b981;
+      }
+
+      .toast.error {
+        background: #ef4444;
+      }
+
+      .toast.warning {
+        background: #f59e0b;
+      }
+
+      .toast.info {
+        background: #3b82f6;
+      }
+
+      .parallax-bg {
+        background-attachment: fixed;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+      }
+
+      .luxury-gradient {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      }
+
+      .luxury-gradient-reverse {
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+      }
+
+      .card-3d {
+        transform-style: preserve-3d;
+        perspective: 1000px;
+      }
+
+      .card-3d:hover {
+        transform: rotateY(5deg) rotateX(5deg);
+      }
+
+      .smooth-scroll {
+        scroll-behavior: smooth;
+      }
+
+      .nav-glass {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .dark .nav-glass {
+        background: rgba(17, 24, 39, 0.8);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .pulse-soft {
+        animation: pulseSoft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      }
+
+      @keyframes pulseSoft {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.7;
+        }
+      }
+      .header-glass {
+        background: linear-gradient(
+          135deg,
+          rgba(102, 126, 234, 0.85) 0%,
+          rgba(118, 75, 162, 0.85) 100%
+        );
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.5s ease;
+        animation: slide-down 0.8s ease-out;
+      }
+      .gradient-text {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      /* BMI specific styles */
+      .bmi-gauge {
+        position: relative;
+        width: 300px;
+        height: 150px;
+        margin: 0 auto;
+      }
+
+      .bmi-gauge-fill {
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 20px;
+        background: linear-gradient(to top, #10b981, #f59e0b, #ef4444);
+        border-radius: 10px 10px 0 0;
+        transition: height 1s ease;
+      }
+
+      .bmi-gauge-needle {
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%) rotate(0deg);
+        width: 2px;
+        height: 160px;
+        background: #1f2937;
+        transform-origin: bottom center;
+        transition: transform 1s ease;
+        z-index: 10;
+      }
+
+      .bmi-category {
+        transition: all 0.3s ease;
+      }
+      .comments-container {
+        max-height: 400px;
+        overflow-y: auto;
+        padding-right: 8px;
+      }
+
+      .comments-container::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .comments-container::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+      }
+
+      .comments-container::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 3px;
+      }
+
+      .dark .comments-container::-webkit-scrollbar-track {
+        background: #374151;
+      }
+
+      .dark .comments-container::-webkit-scrollbar-thumb {
+        background: #6b7280;
+      }
+
+      .comment-item {
+        border-left: 3px solid transparent;
+        transition: all 0.3s ease;
+        animation: fadeInUp 0.5s ease forwards;
+      }
+
+      .comment-item:hover {
+        border-left-color: #667eea;
+        background: rgba(102, 126, 234, 0.05);
+        transform: translateX(4px);
+      }
+
+      .dark .comment-item:hover {
+        background: rgba(102, 126, 234, 0.1);
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .comment-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 14px;
+        flex-shrink: 0;
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .bmi-category.active {
+        transform: scale(1.05);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+      }
+
+      .bmi-result-card {
+        transition: all 0.5s ease;
+      }
+
+      .progress-bar-container {
+        height: 8px;
+        background: #e5e7eb;
+        border-radius: 4px;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .progress-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        border-radius: 4px;
+        transition: width 0.5s ease;
+      }
+
+      .post-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+      }
+
+      .topic-badge {
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        cursor: pointer;
+      }
+
+      .comment-item {
+        background: rgba(0, 0, 0, 0.03);
+        border-radius: 0.75rem;
+        padding: 0.75rem;
+        margin-bottom: 0.75rem;
+        transition: all 0.2s;
+      }
+      .dark .comment-item {
+        background: rgba(255, 255, 255, 0.05);
+      }
+      .comment-item:hover {
+        background: rgba(0, 149, 246, 0.05);
+      }
+      .comment-author {
+        font-weight: 600;
+        font-size: 0.875rem;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .comment-text {
+        font-size: 0.9375rem;
+        color: var(--text);
+        margin: 0.25rem 0;
+        line-height: 1.5;
+        word-break: break-word;
+      }
+      .comment-time {
+        font-size: 0.75rem;
+        color: var(--gray);
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+      }
+      .delete-comment-btn {
+        opacity: 0;
+        transition: opacity 0.2s;
+      }
+      .comment-item:hover .delete-comment-btn {
+        opacity: 1;
+      }
+      .no-comments {
+        background: rgba(0, 149, 246, 0.05);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        text-align: center;
+      }
+      .loading-comments {
+        background: rgba(0, 149, 246, 0.05);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        text-align: center;
+      }
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .comment-item {
+        animation: fadeInUp 0.3s ease forwards;
+        opacity: 0;
+      }
+      .comment-item:nth-child(1) {
+        animation-delay: 0.1s;
+      }
+      .comment-item:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+      .comment-item:nth-child(3) {
+        animation-delay: 0.3s;
+      }
+      .comment-item:nth-child(4) {
+        animation-delay: 0.4s;
+      }
+    </style>
+  </head>
+  <body
+    class="bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 font-inter transition-colors duration-500"
+  >
+    <!-- Hero Section -->
+    <section
+      class="min-h-screen hero-gradient text-white relative overflow-hidden"
+    >
+      <!-- Animated Background -->
+      <div class="absolute inset-0">
+        <div
+          class="floating-element absolute top-1/4 left-10 w-32 h-32 rounded-full bg-white/10 blur-3xl"
+        ></div>
+        <div
+          class="floating-element absolute top-1/3 right-20 w-24 h-24 rounded-full bg-white/10 blur-3xl"
+        ></div>
+        <div
+          class="floating-element absolute bottom-1/4 left-1/3 w-40 h-40 rounded-full bg-white/10 blur-3xl"
+        ></div>
+        <div
+          class="absolute bottom-0 left-0 w-full h-40 bg-gradient-to-t from-white dark:from-gray-900 to-transparent"
+        ></div>
+      </div>
+
+      <!-- Header -->
+      <header class="fixed top-0 left-0 w-full z-50 header-glass nav-glass">
+        <div class="container mx-auto px-4">
+          <div class="flex justify-between items-center py-4">
+            <div class="flex items-center space-x-3">
+              <div
+                class="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-white/30 transition-all"
+              >
+                <i class="fas fa-heart text-white text-xl"></i>
+              </div>
+              <span class="text-2xl font-bold text-white">HealthyLife</span>
+            </div>
+
+            <nav class="hidden md:flex items-center space-x-8">
+              <a
+                href="#features"
+                class="font-medium hover:text-white/80 transition-colors duration-300"
+                >Tính năng</a
+              >
+              <a
+                href="#how-it-works"
+                class="font-medium hover:text-white/80 transition-colors duration-300"
+                >Cách hoạt động</a
+              >
+              <a
+                href="#apps"
+                class="font-medium hover:text-white/80 transition-colors duration-300"
+                >Ứng dụng</a
+              >
+              <a
+                href="#community"
+                class="font-medium hover:text-white/80 transition-colors duration-300"
+                >Cộng đồng</a
+              >
+
+              <!-- User Menu -->
+              <div class="relative" id="user-menu-container">
+                <div class="user-avatar" id="user-avatar">
+                  <i class="fas fa-user"></i>
+                </div>
+                <div class="user-menu" id="user-menu">
+                  <div class="user-menu-item" id="user-profile-btn">
+                    <i class="fas fa-user-circle mr-2"></i>
+                    <span id="user-name">Đang tải...</span>
+                  </div>
+                  <div class="user-menu-item" id="user-id-display">
+                    <i class="fas fa-fingerprint mr-2"></i>
+                    <span class="truncate" id="user-id-text">ID: ...</span>
+                  </div>
+                  <div
+                    class="border-t border-gray-200 dark:border-gray-700 my-2"
+                  ></div>
+                  <div
+                    class="user-menu-item"
+                    id="logout-btn"
+                    style="display: none"
+                  >
+                    <i class="fas fa-sign-out-alt mr-2"></i>
+                    <span>Đăng xuất</span>
+                  </div>
+                  <div class="user-menu-item" id="login-btn">
+                    <i class="fas fa-sign-in-alt mr-2"></i>
+                    <span>Đăng nhập</span>
+                  </div>
+                  <div class="user-menu-item" id="register-btn">
+                    <i class="fas fa-user-plus mr-2"></i>
+                    <span>Đăng ký</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Dark Mode Toggle -->
+              <div class="flex items-center">
+                <div
+                  class="relative inline-block w-12 h-6 mr-2 align-middle select-none"
+                >
+                  <input
+                    type="checkbox"
+                    name="toggle"
+                    id="dark-mode-toggle"
+                    class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-2 border-gray-300 appearance-none cursor-pointer transition-all duration-300 checked:right-0 checked:bg-primary-500 checked:border-primary-500"
+                  />
+                  <label
+                    for="dark-mode-toggle"
+                    class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer transition-all duration-300 dark:bg-gray-600"
+                  ></label>
+                </div>
+                <i class="fas fa-moon text-white/60"></i>
+              </div>
+            </nav>
+
+            <button class="md:hidden text-white" id="mobile-menu-btn">
+              <i class="fas fa-bars text-xl"></i>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Hero Content -->
+      <div class="container mx-auto px-4 relative z-10">
+        <div class="min-h-[80vh] flex items-center justify-center">
+          <div class="max-w-6xl mx-auto text-center">
+            <h1
+              class="text-5xl md:text-7xl font-black mb-6 text-glow animate-fade-in"
+            >
+              <span class="block">Hành Trình</span>
+              <span
+                class="block bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent"
+                >Sức Khỏe Cá Nhân</span
+              >
+            </h1>
+
+            <p
+              class="text-xl md:text-2xl mb-12 text-white/90 max-w-3xl mx-auto leading-relaxed animate-fade-in"
+              style="animation-delay: 0.2s"
+            >
+              Khám phá hệ thống chăm sóc sức khỏe toàn diện được cá nhân hóa
+              bằng AI Gemini.
+              <span class="font-semibold"
+                >Tính BMI - Dinh dưỡng thông minh - Tập luyện hiệu quả</span
+              >
+            </p>
+
+            <div
+              class="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-6 animate-fade-in"
+              style="animation-delay: 0.4s"
+            >
+              <button
+                onclick="app.navigation.handleGetStarted()"
+                class="btn-glow text-white font-bold px-8 py-4 rounded-2xl text-lg flex items-center justify-center min-w-[200px]"
+              >
+                <i class="fas fa-rocket mr-3"></i>
+                <span>Bắt đầu ngay</span>
+              </button>
+              <a
+                href="#how-it-works"
+                class="glass-effect border border-white/30 text-white font-bold px-8 py-4 rounded-2xl hover:bg-white/10 transition-all duration-300 flex items-center justify-center min-w-[200px]"
+              >
+                <i class="fas fa-play-circle mr-3"></i>
+                <span>Xem giới thiệu</span>
+              </a>
+            </div>
+
+            <!-- Stats -->
+            <div
+              class="grid grid-cols-3 gap-8 mt-16 max-w-2xl mx-auto animate-slide-up"
+              style="animation-delay: 0.6s"
+            >
+              <div class="text-center">
+                <div class="text-3xl md:text-4xl font-black mb-2 text-glow">
+                  10K+
+                </div>
+                <div class="text-white/70 text-sm font-medium">Người dùng</div>
+              </div>
+              <div class="text-center">
+                <div class="text-3xl md:text-4xl font-black mb-2 text-glow">
+                  95%
+                </div>
+                <div class="text-white/70 text-sm font-medium">Thành công</div>
+              </div>
+              <div class="text-center">
+                <div class="text-3xl md:text-4xl font-black mb-2 text-glow">
+                  24/7
+                </div>
+                <div class="text-white/70 text-sm font-medium">Hỗ trợ AI</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scroll Indicator -->
+      <div
+        class="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce"
+      >
+        <a
+          href="#features"
+          class="text-white/70 hover:text-white transition-colors"
+        >
+          <i class="fas fa-chevron-down text-2xl"></i>
+        </a>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section
+      id="features"
+      class="py-24 bg-white dark:bg-gray-900 transition-colors duration-500"
+    >
+      <div class="container mx-auto px-4">
+        <div class="text-center mb-20 animate-fade-in">
+          <h2 class="text-4xl md:text-5xl font-black mb-6 gradient-text">
+            Tính Năng Đột Phá
+          </h2>
+          <p class="text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
+            HealthyLife kết hợp sức mạnh AI Gemini với chuyên môn sức khỏe để
+            mang đến trải nghiệm cá nhân hóa hoàn toàn mới
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <!-- Feature 1 -->
+          <div
+            class="feature-card card-hover card-3d bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 p-8 rounded-3xl animate-slide-up"
+          >
+            <div
+              class="feature-icon w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white mb-6"
+            >
+              <i class="fas fa-calculator text-2xl"></i>
+            </div>
+            <h3 class="text-2xl font-bold mb-4 text-gray-800 dark:text-white">
+              Tính BMI Thông Minh
+            </h3>
+            <p class="text-gray-600 dark:text-gray-400 mb-6">
+              Tính chỉ số BMI chính xác và nhận đánh giá chi tiết về tình trạng
+              sức khỏe hiện tại của bạn
+            </p>
+            <ul class="space-y-2 text-gray-600 dark:text-gray-400">
+              <li class="flex items-center">
+                <i class="fas fa-check text-blue-500 mr-2"></i
+                ><span>Tính toán BMI chính xác</span>
+              </li>
+              <li class="flex items-center">
+                <i class="fas fa-check text-blue-500 mr-2"></i
+                ><span>Phân loại theo tiêu chuẩn</span>
+              </li>
+              <li class="flex items-center">
+                <i class="fas fa-check text-blue-500 mr-2"></i
+                ><span>Khuyến nghị từ AI</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Feature 2 -->
+          <div
+            class="feature-card card-hover card-3d bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 p-8 rounded-3xl animate-slide-up"
+            style="animation-delay: 0.2s"
+          >
+            <div
+              class="feature-icon w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center text-white mb-6"
+            >
+              <i class="fas fa-utensils text-2xl"></i>
+            </div>
+            <h3 class="text-2xl font-bold mb-4 text-gray-800 dark:text-white">
+              Dinh Dưỡng AI
+            </h3>
+            <p class="text-gray-600 dark:text-gray-400 mb-6">
+              Kế hoạch dinh dưỡng được tạo riêng cho bạn bằng AI Gemini, phù hợp
+              với mục tiêu và sở thích cá nhân
+            </p>
+            <ul class="space-y-2 text-gray-600 dark:text-gray-400">
+              <li class="flex items-center">
+                <i class="fas fa-check text-purple-500 mr-2"></i
+                ><span>Thực đơn cá nhân hóa</span>
+              </li>
+              <li class="flex items-center">
+                <i class="fas fa-check text-purple-500 mr-2"></i
+                ><span>Gợi ý món ăn Việt Nam</span>
+              </li>
+              <li class="flex items-center">
+                <i class="fas fa-check text-purple-500 mr-2"></i
+                ><span>Theo dõi lượng calo</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Feature 3 -->
+          <div
+            class="feature-card card-hover card-3d bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 p-8 rounded-3xl animate-slide-up"
+            style="animation-delay: 0.4s"
+          >
+            <div
+              class="feature-icon w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center text-white mb-6"
+            >
+              <i class="fas fa-dumbbell text-2xl"></i>
+            </div>
+            <h3 class="text-2xl font-bold mb-4 text-gray-800 dark:text-white">
+              Tập Luyện Thông Minh
+            </h3>
+            <p class="text-gray-600 dark:text-gray-400 mb-6">
+              Lịch tập được AI thiết kế theo thể trạng, thiết bị có sẵn và mục
+              tiêu cụ thể của bạn
+            </p>
+            <ul class="space-y-2 text-gray-600 dark:text-gray-400">
+              <li class="flex items-center">
+                <i class="fas fa-check text-green-500 mr-2"></i
+                ><span>Lịch tập cá nhân hóa</span>
+              </li>
+              <li class="flex items-center">
+                <i class="fas fa-check text-green-500 mr-2"></i
+                ><span>Hướng dẫn chi tiết</span>
+              </li>
+              <li class="flex items-center">
+                <i class="fas fa-check text-green-500 mr-2"></i
+                ><span>Phù hợp thiết bị có sẵn</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works -->
+    <section
+      id="how-it-works"
+      class="py-24 bg-gray-50 dark:bg-gray-800 transition-colors duration-500"
+    >
+      <div class="container mx-auto px-4">
+        <div class="text-center mb-20 animate-fade-in">
+          <h2 class="text-4xl md:text-5xl font-black mb-6 gradient-text">
+            Cách Thức Hoạt Động
+          </h2>
+          <p class="text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
+            Chỉ với 3 bước đơn giản để bắt đầu hành trình sức khỏe của bạn
+          </p>
+        </div>
+
+        <div class="max-w-4xl mx-auto">
+          <!-- Step 1 -->
+          <div
+            class="flex flex-col md:flex-row items-center mb-16 animate-slide-up"
+          >
+            <div class="md:w-1/3 text-center mb-8 md:mb-0">
+              <div
+                class="w-24 h-24 rounded-full luxury-gradient flex items-center justify-center text-white text-3xl font-black mx-auto shadow-lg"
+              >
+                1
+              </div>
+            </div>
+            <div class="md:w-2/3 text-center md:text-left">
+              <h3 class="text-2xl font-bold mb-4 text-gray-800 dark:text-white">
+                Tính BMI & Đánh Giá
+              </h3>
+              <p class="text-lg text-gray-600 dark:text-gray-400 mb-4">
+                Bắt đầu bằng việc tính chỉ số BMI để hiểu rõ tình trạng sức khỏe
+                hiện tại của bạn
+              </p>
+              <div
+                class="flex justify-center md:justify-start space-x-4 flex-wrap gap-2"
+              >
+                <span
+                  class="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full text-sm font-medium"
+                  >Chiều cao & Cân nặng</span
+                >
+                <span
+                  class="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full text-sm font-medium"
+                  >Phân loại BMI</span
+                >
+                <span
+                  class="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full text-sm font-medium"
+                  >Đánh giá sức khỏe</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 2 -->
+          <div
+            class="flex flex-col md:flex-row items-center mb-16 animate-slide-up"
+            style="animation-delay: 0.2s"
+          >
+            <div class="md:w-1/3 text-center mb-8 md:mb-0 order-2 md:order-1">
+              <div
+                class="w-24 h-24 rounded-full luxury-gradient-reverse flex items-center justify-center text-white text-3xl font-black mx-auto shadow-lg"
+              >
+                2
+              </div>
+            </div>
+            <div class="md:w-2/3 text-center md:text-left order-1 md:order-2">
+              <h3 class="text-2xl font-bold mb-4 text-gray-800 dark:text-white">
+                AI Phân Tích & Đề Xuất
+              </h3>
+              <p class="text-lg text-gray-600 dark:text-gray-400 mb-4">
+                Gemini AI phân tích thông tin và tạo kế hoạch dinh dưỡng, tập
+                luyện phù hợp nhất với bạn
+              </p>
+              <div
+                class="flex justify-center md:justify-start space-x-4 flex-wrap gap-2"
+              >
+                <span
+                  class="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-full text-sm font-medium"
+                  >AI Gemini</span
+                >
+                <span
+                  class="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-full text-sm font-medium"
+                  >Cá nhân hóa</span
+                >
+                <span
+                  class="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-full text-sm font-medium"
+                  >Tối ưu hóa</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 3 -->
+          <div
+            class="flex flex-col md:flex-row items-center animate-slide-up"
+            style="animation-delay: 0.4s"
+          >
+            <div class="md:w-1/3 text-center mb-8 md:mb-0">
+              <div
+                class="w-24 h-24 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white text-3xl font-black mx-auto shadow-lg"
+              >
+                3
+              </div>
+            </div>
+            <div class="md:w-2/3 text-center md:text-left">
+              <h3 class="text-2xl font-bold mb-4 text-gray-800 dark:text-white">
+                Theo Dõi & Điều Chỉnh
+              </h3>
+              <p class="text-lg text-gray-600 dark:text-gray-400 mb-4">
+                Theo dõi tiến độ, nhận đánh giá và điều chỉnh kế hoạch dựa trên
+                kết quả thực tế của bạn
+              </p>
+              <div
+                class="flex justify-center md:justify-start space-x-4 flex-wrap gap-2"
+              >
+                <span
+                  class="px-3 py-1 bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 rounded-full text-sm font-medium"
+                  >Biểu đồ</span
+                >
+                <span
+                  class="px-3 py-1 bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 rounded-full text-sm font-medium"
+                  >Đánh giá</span
+                >
+                <span
+                  class="px-3 py-1 bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 rounded-full text-sm font-medium"
+                  >Cập nhật</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Apps Section -->
+    <section
+      id="apps"
+      class="py-24 bg-white dark:bg-gray-900 transition-colors duration-500"
+    >
+      <div class="container mx-auto px-4">
+        <div class="text-center mb-20 animate-fade-in">
+          <h2 class="text-4xl md:text-5xl font-black mb-6 gradient-text">
+            Bộ Ứng Dụng HealthyLife
+          </h2>
+          <p class="text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
+            Khám phá bộ ba ứng dụng được thiết kế đặc biệt cho hành trình sức
+            khỏe của bạn
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <!-- BMI App -->
+          <div
+            class="card-hover card-3d bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-3xl p-8 animate-slide-up shadow-xl"
+          >
+            <div class="flex items-center mb-6">
+              <div
+                class="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center mr-4"
+              >
+                <i class="fas fa-calculator text-2xl"></i>
+              </div>
+              <div>
+                <h3 class="text-2xl font-bold">Tính BMI</h3>
+                <p class="text-blue-100 text-sm">Đánh giá thể trạng</p>
+              </div>
+            </div>
+            <p class="mb-6 text-blue-100">
+              Tính chỉ số BMI và nhận đánh giá chi tiết về tình trạng sức khỏe
+              hiện tại của bạn
+            </p>
+            <ul class="space-y-3 mb-8">
+              <li class="flex items-center">
+                <i class="fas fa-check-circle mr-3"></i
+                ><span>Tính toán BMI chính xác</span>
+              </li>
+              <li class="flex items-center">
+                <i class="fas fa-check-circle mr-3"></i
+                ><span>Phân loại theo tiêu chuẩn</span>
+              </li>
+              <li class="flex items-center">
+                <i class="fas fa-check-circle mr-3"></i
+                ><span>Khuyến nghị từ AI</span>
+              </li>
+            </ul>
+            <button
+              onclick="app.navigation.handleFeatureNavigation('bmi')"
+              class="w-full bg-white text-blue-600 font-bold py-4 rounded-xl text-center hover:bg-blue-50 transition-colors duration-300"
+            >
+              Khám phá ngay
+            </button>
+          </div>
+
+          <!-- Diet App -->
+          <div
+            class="card-hover card-3d bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-3xl p-8 animate-slide-up shadow-xl"
+            style="animation-delay: 0.2s"
+          >
+            <div class="flex items-center mb-6">
+              <div
+                class="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center mr-4"
+              >
+                <i class="fas fa-utensils text-2xl"></i>
+              </div>
+              <div>
+                <h3 class="text-2xl font-bold">Dinh Dưỡng</h3>
+                <p class="text-purple-100 text-sm">
+                  Kế hoạch ăn uống thông minh
+                </p>
+              </div>
+            </div>
+            <p class="mb-6 text-purple-100">
+              Nhận thực đơn cá nhân hóa được AI Gemini tạo riêng cho mục tiêu và
+              sở thích của bạn
+            </p>
+            <ul class="space-y-3 mb-8">
+              <li class="flex items-center">
+                <i class="fas fa-check-circle mr-3"></i
+                ><span>Thực đơn theo mục tiêu</span>
+              </li>
+              <li class="flex items-center">
+                <i class="fas fa-check-circle mr-3"></i
+                ><span>Gợi ý món ăn Việt Nam</span>
+              </li>
+              <li class="flex items-center">
+                <i class="fas fa-check-circle mr-3"></i
+                ><span>Theo dõi dinh dưỡng</span>
+              </li>
+            </ul>
+            <button
+              onclick="app.navigation.handleFeatureNavigation('dinh-duong')"
+              class="w-full bg-white text-purple-600 font-bold py-4 rounded-xl text-center hover:bg-purple-50 transition-colors duration-300"
+            >
+              Khám phá ngay
+            </button>
+          </div>
+
+          <!-- Workout App -->
+          <div
+            class="card-hover card-3d bg-gradient-to-br from-green-500 to-green-600 text-white rounded-3xl p-8 animate-slide-up shadow-xl"
+            style="animation-delay: 0.4s"
+          >
+            <div class="flex items-center mb-6">
+              <div
+                class="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center mr-4"
+              >
+                <i class="fas fa-dumbbell text-2xl"></i>
+              </div>
+              <div>
+                <h3 class="text-2xl font-bold">Tập Luyện</h3>
+                <p class="text-green-100 text-sm">Lịch tập cá nhân hóa</p>
+              </div>
+            </div>
+            <p class="mb-6 text-green-100">
+              Lịch tập được AI thiết kế phù hợp với thể trạng và thiết bị bạn có
+            </p>
+            <ul class="space-y-3 mb-8">
+              <li class="flex items-center">
+                <i class="fas fa-check-circle mr-3"></i
+                ><span>Lịch tập theo tần suất</span>
+              </li>
+              <li class="flex items-center">
+                <i class="fas fa-check-circle mr-3"></i
+                ><span>Hướng dẫn chi tiết</span>
+              </li>
+              <li class="flex items-center">
+                <i class="fas fa-check-circle mr-3"></i
+                ><span>Phù hợp thiết bị có sẵn</span>
+              </li>
+            </ul>
+            <button
+              onclick="app.navigation.handleFeatureNavigation('tap-luyen')"
+              class="w-full bg-white text-green-600 font-bold py-4 rounded-xl text-center hover:bg-green-50 transition-colors duration-300"
+            >
+              Khám phá ngay
+            </button>
+          </div>
+        </div>
+
+        <!-- Unified CTA -->
+        <div
+          class="text-center mt-16 animate-fade-in"
+          style="animation-delay: 0.6s"
+        >
+          <div
+            class="luxury-gradient rounded-3xl p-8 max-w-4xl mx-auto shadow-xl"
+          >
+            <h3 class="text-2xl md:text-3xl font-bold text-white mb-4">
+              Sẵn sàng bắt đầu hành trình?
+            </h3>
+            <p class="text-white/90 mb-8 text-lg">
+              Kết hợp cả ba ứng dụng để có trải nghiệm chăm sóc sức khỏe toàn
+              diện nhất
+            </p>
+            <div
+              class="flex flex-col md:flex-row justify-center space-y-4 md:space-y-0 md:space-x-6"
+            >
+              <button
+                onclick="app.navigation.handleGetStarted()"
+                class="bg-white text-blue-600 font-bold px-8 py-4 rounded-xl hover:bg-gray-100 transition-colors flex items-center justify-center"
+              >
+                <i class="fas fa-calculator mr-3"></i>
+                Bắt đầu với BMI
+              </button>
+              <a
+                href="#features"
+                class="glass-effect border border-white/30 text-white font-bold px-8 py-4 rounded-xl hover:bg-white/10 transition-colors flex items-center justify-center"
+              >
+                <i class="fas fa-info-circle mr-3"></i>
+                Tìm hiểu thêm
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Community Section -->
+    <section
+      id="community"
+      class="py-24 bg-gray-50 dark:bg-gray-800 transition-colors duration-500"
+    >
+      <div class="container mx-auto px-4">
+        <div class="text-center mb-20 animate-fade-in">
+          <h2 class="text-4xl md:text-5xl font-black mb-6 gradient-text">
+            Cộng Đồng HealthyLife
+          </h2>
+          <p class="text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
+            Chia sẻ hành trình, động viên nhau, và cùng nhau đạt được mục tiêu
+            sức khỏe
+          </p>
+        </div>
+
+        <!-- Topic Filter -->
+        <div class="flex justify-center mb-12 overflow-x-auto pb-4">
+          <div class="flex space-x-3">
+            <button
+              class="topic-badge px-6 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-300 dark:border-blue-700 filter-btn active"
+              data-topic="all"
+            >
+              <i class="fas fa-fire mr-2"></i>Tất cả
+            </button>
+            <button
+              class="topic-badge px-6 py-2 hover:bg-green-100 dark:hover:bg-green-900/30 hover:text-green-600 dark:hover:text-green-400 filter-btn"
+              data-topic="Giảm cân"
+            >
+              <i class="fas fa-minus-circle mr-2"></i>Giảm cân
+            </button>
+            <button
+              class="topic-badge px-6 py-2 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 filter-btn"
+              data-topic="Tăng cân"
+            >
+              <i class="fas fa-plus-circle mr-2"></i>Tăng cân
+            </button>
+            <button
+              class="topic-badge px-6 py-2 hover:bg-purple-100 dark:hover:bg-purple-900/30 hover:text-purple-600 dark:hover:text-purple-400 filter-btn"
+              data-topic="Tăng cơ"
+            >
+              <i class="fas fa-heartbeat mr-2"></i>Tăng cơ
+            </button>
+            <button
+              class="topic-badge px-6 py-2 hover:bg-orange-100 dark:hover:bg-orange-900/30 hover:text-orange-600 dark:hover:text-orange-400 filter-btn"
+              data-topic="Dinh dưỡng"
+            >
+              <i class="fas fa-apple-alt mr-2"></i>Dinh dưỡng
+            </button>
+          </div>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div
+          id="community-loading"
+          class="flex justify-center items-center py-12"
+        >
+          <div class="loader"></div>
+          <span class="ml-3 text-gray-600 dark:text-gray-400"
+            >Đang tải bài viết...</span
+          >
+        </div>
+
+        <!-- Posts Grid -->
+        <div
+          id="posts-container"
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto hidden"
+        >
+          <!-- Posts will be loaded here dynamically -->
+        </div>
+
+        <!-- No Posts Message -->
+        <div id="no-posts-message" class="text-center py-12 hidden">
+          <i class="fas fa-inbox text-4xl text-gray-400 mb-4"></i>
+          <p class="text-gray-500 dark:text-gray-400">
+            Chưa có bài viết nào. Hãy là người đầu tiên chia sẻ!
+          </p>
+        </div>
+
+        <!-- Pagination -->
+        <div
+          id="pagination"
+          class="flex justify-center items-center mt-12 space-x-4 hidden"
+        >
+          <button
+            id="prev-page"
+            class="px-4 py-2 bg-white dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            disabled
+          >
+            <i class="fas fa-chevron-left mr-2"></i>Trước
+          </button>
+          <span
+            id="page-info"
+            class="text-gray-600 dark:text-gray-400 text-sm"
+          ></span>
+          <button
+            id="next-page"
+            class="px-4 py-2 bg-white dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            disabled
+          >
+            Sau<i class="fas fa-chevron-right ml-2"></i>
+          </button>
+        </div>
+
+        <!-- CTA Share -->
+        <div
+          class="text-center mt-16 animate-fade-in"
+          style="animation-delay: 0.8s"
+        >
+          <div
+            class="luxury-gradient rounded-3xl p-8 max-w-3xl mx-auto shadow-xl"
+          >
+            <h3 class="text-2xl md:text-3xl font-bold text-white mb-4">
+              Chia sẻ câu chuyện của bạn! 📱
+            </h3>
+            <p class="text-white/90 mb-8">
+              Động viên những người khác, chia sẻ kinh nghiệm, và cùng nhau phát
+              triển
+            </p>
+            <button
+              onclick="app.communityHandler.openCreatePostModal()"
+              class="bg-white text-blue-600 font-bold px-10 py-4 rounded-xl hover:bg-gray-100 transition-colors inline-flex items-center"
+            >
+              <i class="fas fa-pen-fancy mr-3"></i>
+              Viết bài chia sẻ
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Create Post Modal -->
+    <div
+      id="create-post-modal"
+      class="modal hidden fixed inset-0 bg-black/70 dark:bg-black/80 z-50 items-center justify-center p-4 transition-opacity duration-300"
+    >
+      <div
+        class="modal-content-inner bg-white dark:bg-gray-800 rounded-lg w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden shadow-xl relative"
+      >
+        <!-- Modal Header -->
+        <div
+          class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0"
+        >
+          <h3 class="text-xl font-bold text-gray-800 dark:text-white">
+            Chia sẻ hành trình của bạn
+          </h3>
+          <button
+            id="create-post-close"
+            class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+          >
+            <i class="fas fa-times text-xl"></i>
+          </button>
+        </div>
+
+        <!-- Modal Content -->
+        <div class="flex-1 overflow-y-auto p-4">
+          <div class="mb-4">
+            <label
+              class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
+              Chủ đề
+            </label>
+            <select
+              id="post-topic"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+            >
+              <option value="Giảm cân">Giảm cân</option>
+              <option value="Tăng cân">Tăng cân</option>
+              <option value="Tăng cơ">Tăng cơ</option>
+              <option value="Dinh dưỡng">Dinh dưỡng</option>
+            </select>
+          </div>
+
+          <div class="mb-4">
+            <label
+              class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
+              Tiêu đề
+            </label>
+            <input
+              type="text"
+              id="post-title"
+              placeholder="Tiêu đề bài viết..."
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+            />
+          </div>
+
+          <div class="mb-4">
+            <label
+              class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
+              Nội dung
+            </label>
+            <textarea
+              id="post-content"
+              rows="6"
+              placeholder="Chia sẻ câu chuyện của bạn..."
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 resize-none"
+            ></textarea>
+          </div>
+
+          <div class="mb-4">
+            <label
+              class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
+              Mẹo hoàn thành (tùy chọn)
+            </label>
+            <textarea
+              id="post-tip"
+              rows="3"
+              placeholder="Chia sẻ bí quyết của bạn..."
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 resize-none"
+            ></textarea>
+          </div>
+
+          <div class="mb-4">
+            <label
+              class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
+              Tiến độ (%)
+            </label>
+            <input
+              type="range"
+              id="post-progress"
+              min="0"
+              max="100"
+              value="0"
+              class="w-full"
+            />
+            <div
+              class="flex justify-between text-sm text-gray-600 dark:text-gray-400"
+            >
+              <span>0%</span>
+              <span id="progress-value">0%</span>
+              <span>100%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div
+          class="border-t border-gray-200 dark:border-gray-700 p-4 flex-shrink-0"
+        >
+          <div class="flex justify-end space-x-3">
+            <button
+              id="cancel-post"
+              class="px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            >
+              Hủy
+            </button>
+            <button
+              id="submit-post"
+              class="px-6 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            >
+              Đăng bài
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Post Detail Modal -->
+    <div
+      id="post-modal"
+      class="fixed inset-0 bg-black/70 dark:bg-black/80 z-50 hidden items-center justify-center p-4 transition-opacity duration-300"
+    >
+      <div
+        class="modal-content-inner bg-white dark:bg-gray-800 rounded-lg w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden shadow-xl relative"
+      >
+        <!-- Modal Header -->
+        <div
+          class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0"
+        >
+          <div class="flex items-center space-x-3">
+            <div id="modal-user-avatar" class="post-avatar">U</div>
+            <div>
+              <div
+                id="modal-user-name"
+                class="font-bold text-gray-800 dark:text-white text-sm"
+              ></div>
+              <div
+                id="modal-post-time"
+                class="text-gray-500 dark:text-gray-400 text-xs"
+              ></div>
+            </div>
+          </div>
+          <button
+            id="modal-close"
+            class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+          >
+            <i class="fas fa-times text-xl"></i>
+          </button>
+        </div>
+
+        <!-- Modal Content -->
+        <div class="flex-1 overflow-y-auto p-4">
+          <div id="modal-topic" class="inline-block mb-3">
+            <!-- Topic badge will be inserted here -->
+          </div>
+          <h3
+            id="modal-post-title"
+            class="text-xl font-bold text-gray-800 dark:text-white mb-3"
+          ></h3>
+          <p
+            id="modal-post-content"
+            class="text-gray-600 dark:text-gray-300 leading-relaxed mb-4"
+          ></p>
+
+          <div
+            id="modal-post-tip"
+            class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg text-sm text-gray-700 dark:text-gray-300 mb-4 hidden"
+          >
+            <strong>💡 Cách hoàn thành:</strong>
+            <span id="modal-tip-content"></span>
+          </div>
+
+          <div class="progress-bar-container mb-4">
+            <div id="modal-progress-bar" class="progress-bar-fill"></div>
+          </div>
+
+          <!-- Comments Section -->
+          <div class="mt-6 border-t border-gray-200 dark:border-gray-700 pt-4">
+            <h4 class="font-bold text-gray-800 dark:text-white mb-3">
+              Bình luận
+            </h4>
+
+            <div
+              id="comments-container"
+              class="space-y-3 mb-4 max-h-60 overflow-y-auto"
+            >
+              <!-- Comments will be loaded here -->
+            </div>
+
+            <!-- Add Comment Form -->
+            <div class="flex space-x-3">
+              <input
+                type="text"
+                id="comment-input"
+                placeholder="Viết bình luận..."
+                class="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+              />
+              <button
+                id="submit-comment"
+                class="px-4 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+              >
+                Gửi
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div
+          class="border-t border-gray-200 dark:border-gray-700 p-4 flex-shrink-0"
+        >
+          <div
+            class="flex justify-between items-center text-gray-600 dark:text-gray-400"
+          >
+            <div class="flex space-x-4">
+              <button
+                id="modal-like-btn"
+                class="like-btn flex items-center hover:text-red-500 transition-colors"
+              >
+                <i class="far fa-heart mr-1"></i>
+                <span id="modal-likes-count">0</span>
+              </button>
+              <button
+                class="flex items-center hover:text-blue-500 transition-colors"
+              >
+                <i class="far fa-comment mr-1"></i>
+                <span id="modal-comments-count">0</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-16">
+      <div class="container mx-auto px-4">
+        <div class="max-w-6xl mx-auto">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+            <div>
+              <div class="flex items-center space-x-2 mb-4">
+                <div
+                  class="w-8 h-8 rounded-full luxury-gradient flex items-center justify-center"
+                >
+                  <i class="fas fa-heart text-white text-sm"></i>
+                </div>
+                <span class="text-xl font-bold">HealthyLife</span>
+              </div>
+              <p class="text-gray-400 text-sm leading-relaxed">
+                Đồng hành cùng bạn trên hành trình chăm sóc sức khỏe và xây dựng
+                lối sống lành mạnh bền vững.
+              </p>
+            </div>
+
+            <div>
+              <h4 class="text-lg font-bold mb-6">Ứng dụng</h4>
+              <ul class="space-y-3 text-gray-400 text-sm">
+                <li>
+                  <a
+                    href="javascript:void(0)"
+                    onclick="app.navigation.handleFeatureNavigation('bmi')"
+                    class="hover:text-blue-400 transition-colors"
+                    >Tính BMI</a
+                  >
+                </li>
+                <li>
+                  <a
+                    href="javascript:void(0)"
+                    onclick="app.navigation.handleFeatureNavigation('dinh-duong')"
+                    class="hover:text-blue-400 transition-colors"
+                    >Kế hoạch Dinh dưỡng</a
+                  >
+                </li>
+                <li>
+                  <a
+                    href="javascript:void(0)"
+                    onclick="app.navigation.handleFeatureNavigation('tap-luyen')"
+                    class="hover:text-blue-400 transition-colors"
+                    >Lịch Tập luyện</a
+                  >
+                </li>
+                <li>
+                  <a
+                    href="#community"
+                    class="hover:text-blue-400 transition-colors"
+                    >Cộng đồng</a
+                  >
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 class="text-lg font-bold mb-6">Hỗ trợ</h4>
+              <ul class="space-y-3 text-gray-400 text-sm">
+                <li>
+                  <a href="#" class="hover:text-blue-400 transition-colors"
+                    >Câu hỏi thường gặp</a
+                  >
+                </li>
+                <li>
+                  <a href="#" class="hover:text-blue-400 transition-colors"
+                    >Hướng dẫn sử dụng</a
+                  >
+                </li>
+                <li>
+                  <a href="#" class="hover:text-blue-400 transition-colors"
+                    >Liên hệ hỗ trợ</a
+                  >
+                </li>
+                <li>
+                  <a href="#" class="hover:text-blue-400 transition-colors"
+                    >Điều khoản dịch vụ</a
+                  >
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 class="text-lg font-bold mb-6">Công nghệ</h4>
+              <ul class="space-y-3 text-gray-400 text-sm">
+                <li class="flex items-center">
+                  <i class="fab fa-google text-blue-400 mr-2"></i>
+                  <span>Google Gemini AI</span>
+                </li>
+                <li class="flex items-center">
+                  <i class="fas fa-brain text-purple-400 mr-2"></i>
+                  <span>Machine Learning</span>
+                </li>
+                <li class="flex items-center">
+                  <i class="fas fa-mobile-alt text-green-400 mr-2"></i>
+                  <span>Responsive Design</span>
+                </li>
+                <li class="flex items-center">
+                  <i class="fas fa-lock text-yellow-400 mr-2"></i>
+                  <span>Bảo mật hàng đầu</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="border-t border-gray-800 pt-8 text-center">
+            <p class="text-gray-400 text-sm"></p>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Scripts -->
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+    <!-- Back to Top Button -->
+    <button
+      id="back-to-top"
+      class="fixed bottom-8 right-8 w-12 h-12 luxury-gradient text-white rounded-full shadow-lg hidden items-center justify-center hover:opacity-90 transition-all duration-300 z-40"
+    >
+      <i class="fas fa-chevron-up"></i>
+    </button>
+
+    <script>
+      // Firebase configuration
+      const firebaseConfig = {
+        apiKey: 'AIzaSyDM1a0oOpASYPKm5uvcP3TOyxbfPvveUcM',
+        authDomain: 'studio-5972092068-9fcbe.firebaseapp.com',
+        databaseURL:
+          'https://studio-5972092068-9fcbe-default-rtdb.firebaseio.com',
+        projectId: 'studio-5972092068-9fcbe',
+        storageBucket: 'studio-5972092068-9fcbe.firebasestorage.app',
+        messagingSenderId: '736553265711',
+        appId: '1:736553265711:web:821e67e676d62a01aeb4da',
+      };
+
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+      const database = firebase.database();
+
+      // ===== MODULAR APPLICATION ARCHITECTURE =====
+      const app = {
+        // Configuration
+        config: {
+          storageKey: 'healthylife_user',
+          sessionDuration: 24 * 60 * 60 * 1000, // 24 hours
+          firebase: {
+            database: database,
+            paths: {
+              posts: 'posts',
+              users: 'users',
+              comments: 'comments',
+              likes: 'likes',
+            },
+          },
+        },
+
+        // Data Handler Module
+        dataHandler: {
+          // Generate unique user ID
+          generateUserId() {
+            return (
+              'user_' +
+              Math.random().toString(36).substr(2, 9) +
+              '_' +
+              Date.now().toString(36)
+            );
+          },
+
+          // Save user data to localStorage
+          saveUserData(userData) {
+            try {
+              const data = {
+                ...userData,
+                expires: Date.now() + app.config.sessionDuration,
+              };
+              localStorage.setItem(app.config.storageKey, JSON.stringify(data));
+              return true;
+            } catch (error) {
+              console.error('Error saving user data:', error);
+              return false;
+            }
+          },
+
+          // Get user data from localStorage
+          getUserData() {
+            try {
+              const userData = localStorage.getItem(app.config.storageKey);
+              if (!userData) return null;
+
+              const user = JSON.parse(userData);
+
+              // Check if session is expired
+              if (user.expires && user.expires < Date.now()) {
+                localStorage.removeItem(app.config.storageKey);
+                return null;
+              }
+
+              return user;
+            } catch (error) {
+              console.error('Error getting user data:', error);
+              localStorage.removeItem(app.config.storageKey);
+              return null;
+            }
+          },
+
+          // Clear user data (logout)
+          clearUserData() {
+            localStorage.removeItem(app.config.storageKey);
+          },
+
+          // Firebase Database Operations
+          // Save data to Firebase
+          async saveToFirebase(path, data, id = null) {
+            try {
+              const ref = id
+                ? app.config.firebase.database.ref(`${path}/${id}`)
+                : app.config.firebase.database.ref(path).push();
+
+              await ref.set({
+                ...data,
+                lastUpdated: firebase.database.ServerValue.TIMESTAMP,
+              });
+
+              console.log(`Data saved to Firebase at ${path}/${id || ref.key}`);
+              return id || ref.key;
+            } catch (error) {
+              console.error(`Error saving to Firebase at ${path}:`, error);
+              throw error;
+            }
+          },
+
+          // Get data from Firebase
+          async getFromFirebase(path, orderBy = null, limit = null) {
+            try {
+              let ref = app.config.firebase.database.ref(path);
+
+              if (orderBy) {
+                ref = ref.orderByChild(orderBy);
+              }
+
+              if (limit) {
+                ref = ref.limitToLast(limit);
+              }
+
+              const snapshot = await ref.once('value');
+              return snapshot.val();
+            } catch (error) {
+              console.error(`Error fetching from Firebase at ${path}:`, error);
+              throw error;
+            }
+          },
+
+          // Listen for realtime updates
+          listenToFirebase(path, callback, orderBy = null, limit = null) {
+            try {
+              let ref = app.config.firebase.database.ref(path);
+
+              if (orderBy) {
+                ref = ref.orderByChild(orderBy);
+              }
+
+              if (limit) {
+                ref = ref.limitToLast(limit);
+              }
+
+              return ref.on('value', (snapshot) => {
+                callback(snapshot.val());
+              });
+            } catch (error) {
+              console.error(`Error listening to Firebase at ${path}:`, error);
+              throw error;
+            }
+          },
+
+          // Update data in Firebase
+          async updateInFirebase(path, updates) {
+            try {
+              await app.config.firebase.database.ref(path).update({
+                ...updates,
+                lastUpdated: firebase.database.ServerValue.TIMESTAMP,
+              });
+              console.log(`Data updated in Firebase at ${path}`);
+            } catch (error) {
+              console.error(`Error updating in Firebase at ${path}:`, error);
+              throw error;
+            }
+          },
+
+          // Delete data from Firebase
+          async deleteFromFirebase(path) {
+            try {
+              await app.config.firebase.database.ref(path).remove();
+              console.log(`Data deleted from Firebase at ${path}`);
+            } catch (error) {
+              console.error(`Error deleting from Firebase at ${path}:`, error);
+              throw error;
+            }
+          },
+
+          // Posts operations
+          async savePost(postData) {
+            return await this.saveToFirebase(app.config.firebase.paths.posts, {
+              ...postData,
+              createdAt: firebase.database.ServerValue.TIMESTAMP,
+            });
+          },
+
+          async getPosts(orderBy = 'createdAt', limit = 100) {
+            return await this.getFromFirebase(
+              app.config.firebase.paths.posts,
+              orderBy,
+              limit
+            );
+          },
+
+          listenToPosts(callback, orderBy = 'createdAt', limit = 100) {
+            return this.listenToFirebase(
+              app.config.firebase.paths.posts,
+              callback,
+              orderBy,
+              limit
+            );
+          },
+
+          async updatePost(postId, updates) {
+            return await this.updateInFirebase(
+              `${app.config.firebase.paths.posts}/${postId}`,
+              updates
+            );
+          },
+
+          async deletePost(postId) {
+            return await this.deleteFromFirebase(
+              `${app.config.firebase.paths.posts}/${postId}`
+            );
+          },
+
+          // Likes operations
+          async saveLike(postId, userId) {
+            return await this.saveToFirebase(
+              `${app.config.firebase.paths.likes}/${postId}`,
+              { [userId]: true },
+              userId
+            );
+          },
+
+          async removeLike(postId, userId) {
+            return await this.deleteFromFirebase(
+              `${app.config.firebase.paths.likes}/${postId}/${userId}`
+            );
+          },
+
+          async getLikes(postId) {
+            return await this.getFromFirebase(
+              `${app.config.firebase.paths.likes}/${postId}`
+            );
+          },
+
+          listenToLikes(postId, callback) {
+            return this.listenToFirebase(
+              `${app.config.firebase.paths.likes}/${postId}`,
+              callback
+            );
+          },
+
+          // Comments operations
+          async saveComment(postId, commentData) {
+            return await this.saveToFirebase(
+              `${app.config.firebase.paths.comments}/${postId}`,
+              {
+                ...commentData,
+                createdAt: firebase.database.ServerValue.TIMESTAMP,
+              }
+            );
+          },
+
+          async getComments(postId, orderBy = 'createdAt', limit = 100) {
+            return await this.getFromFirebase(
+              `${app.config.firebase.paths.comments}/${postId}`,
+              orderBy,
+              limit
+            );
+          },
+
+          listenToComments(
+            postId,
+            callback,
+            orderBy = 'createdAt',
+            limit = 100
+          ) {
+            return this.listenToFirebase(
+              `${app.config.firebase.paths.comments}/${postId}`,
+              callback,
+              orderBy,
+              limit
+            );
+          },
+
+          async deleteComment(postId, commentId) {
+            return await this.deleteFromFirebase(
+              `${app.config.firebase.paths.comments}/${postId}/${commentId}`
+            );
+          },
+        },
+
+        // UI Handler Module
+        uiHandler: {
+          // Show notification toast
+          showNotification(message, type = 'info') {
+            let toastContainer = document.getElementById('toast-container');
+            if (!toastContainer) {
+              toastContainer = document.createElement('div');
+              toastContainer.id = 'toast-container';
+              toastContainer.className = 'fixed top-4 right-4 z-50 space-y-2';
+              document.body.appendChild(toastContainer);
+            }
+
+            const toast = document.createElement('div');
+            toast.className = `toast ${type} show`;
+            toast.textContent = message;
+
+            toastContainer.appendChild(toast);
+
+            setTimeout(() => {
+              toast.classList.remove('show');
+              setTimeout(() => {
+                if (toastContainer.contains(toast)) {
+                  toastContainer.removeChild(toast);
+                }
+              }, 300);
+            }, 4000);
+          },
+
+          // Update user interface based on auth status
+          updateUserUI(user) {
+            const userNameEl = document.getElementById('user-name');
+            const userIdEl = document.getElementById('user-id-text');
+            const userAvatarEl = document.getElementById('user-avatar');
+            const loginBtn = document.getElementById('login-btn');
+            const registerBtn = document.getElementById('register-btn');
+            const logoutBtn = document.getElementById('logout-btn');
+
+            if (user && user.isLoggedIn) {
+              userNameEl.textContent = user.name || 'Người dùng';
+              userIdEl.textContent = `ID: ${user.userId || 'N/A'}`;
+              userAvatarEl.textContent = (user.name || 'U')
+                .charAt(0)
+                .toUpperCase();
+              userAvatarEl.classList.add('font-bold');
+              loginBtn.style.display = 'none';
+              registerBtn.style.display = 'none';
+              logoutBtn.style.display = 'block';
+            } else {
+              userNameEl.textContent = 'Khách';
+              userIdEl.textContent = 'ID: Chưa đăng nhập';
+              userAvatarEl.innerHTML = '<i class="fas fa-user"></i>';
+              userAvatarEl.classList.remove('font-bold');
+              loginBtn.style.display = 'block';
+              registerBtn.style.display = 'block';
+              logoutBtn.style.display = 'none';
+            }
+          },
+
+          // Initialize dark mode
+          initDarkMode() {
+            const darkModeToggle = document.getElementById('dark-mode-toggle');
+
+            // Check for saved theme preference or respect OS setting
+            if (
+              localStorage.getItem('dark-mode') === 'enabled' ||
+              (!('dark-mode' in localStorage) &&
+                window.matchMedia('(prefers-color-scheme: dark)').matches)
+            ) {
+              document.documentElement.classList.add('dark');
+              darkModeToggle.checked = true;
+            } else {
+              document.documentElement.classList.remove('dark');
+              darkModeToggle.checked = false;
+            }
+
+            // Add event listener for toggle
+            darkModeToggle.addEventListener('change', () => {
+              if (darkModeToggle.checked) {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('dark-mode', 'enabled');
+              } else {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('dark-mode', 'disabled');
+              }
+            });
+          },
+
+          // Initialize user menu
+          initUserMenu() {
+            const userAvatar = document.getElementById('user-avatar');
+            const userMenu = document.getElementById('user-menu');
+
+            if (!userAvatar || !userMenu) return;
+
+            userAvatar.addEventListener('click', (e) => {
+              e.stopPropagation();
+              userMenu.classList.toggle('active');
+            });
+
+            // Close menu when clicking outside
+            document.addEventListener('click', () =>
+              userMenu.classList.remove('active')
+            );
+            userMenu.addEventListener('click', (e) => e.stopPropagation());
+          },
+
+          // Initialize back to top button
+          initBackToTop() {
+            const backToTopBtn = document.getElementById('back-to-top');
+
+            function checkScroll() {
+              if (window.pageYOffset > 300) {
+                backToTopBtn.classList.remove('hidden');
+                backToTopBtn.classList.add('flex');
+              } else {
+                backToTopBtn.classList.add('hidden');
+                backToTopBtn.classList.remove('flex');
+              }
+            }
+
+            backToTopBtn.addEventListener('click', () => {
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+
+            window.addEventListener('scroll', checkScroll);
+            checkScroll();
+          },
+
+          // Initialize smooth scrolling for anchor links
+          initSmoothScrolling() {
+            document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+              anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(
+                  this.getAttribute('href')
+                );
+                if (target) {
+                  target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start',
+                  });
+                }
+              });
+            });
+          },
+        },
+
+        // Navigation Handler Module
+        navigation: {
+          // Handle "Get Started" button click
+          handleGetStarted() {
+            const user = app.dataHandler.getUserData();
+            if (user) {
+              // User is logged in, redirect to dashboard
+              window.location.href = 'bmi.html';
+            } else {
+              // User is not logged in, redirect to login
+              window.location.href = 'login.html';
+            }
+          },
+
+          // Handle feature navigation
+          handleFeatureNavigation(feature) {
+            const user = app.dataHandler.getUserData();
+            if (user) {
+              // User is logged in, redirect to specific feature
+              switch (feature) {
+                case 'bmi':
+                  window.location.href = 'bmi.html';
+                  break;
+                case 'dinh-duong':
+                  window.location.href = 'diet.html';
+                  break;
+                case 'tap-luyen':
+                  window.location.href = 'workout.html';
+                  break;
+                default:
+                  window.location.href = 'bmi.html';
+              }
+            } else {
+              // User is not logged in, show notification and redirect to login
+              app.uiHandler.showNotification(
+                'Vui lòng đăng nhập để sử dụng tính năng này!',
+                'warning'
+              );
+              setTimeout(() => {
+                window.location.href = 'login.html';
+              }, 1500);
+            }
+          },
+        },
+
+        // Auth Handler Module
+        authHandler: {
+          // Check authentication status
+          checkAuthStatus() {
+            return app.dataHandler.getUserData();
+          },
+
+          // Login user
+          login(userData) {
+            const user = {
+              ...userData,
+              isLoggedIn: true,
+              userId: userData.userId || app.dataHandler.generateUserId(),
+              loginTime: new Date().toISOString(),
+            };
+
+            if (app.dataHandler.saveUserData(user)) {
+              app.uiHandler.updateUserUI(user);
+              return true;
+            }
+            return false;
+          },
+
+          // Logout user
+          logout() {
+            app.dataHandler.clearUserData();
+            app.uiHandler.updateUserUI(null);
+            app.uiHandler.showNotification(
+              'Đã đăng xuất thành công!',
+              'success'
+            );
+
+            // Redirect to home page after logout
+            setTimeout(() => {
+              window.location.href = 'index.html';
+            }, 1000);
+          },
+        },
+
+        // Community Handler Module - ĐÃ CẬP NHẬT VỚI FIREBASE
+        communityHandler: {
+          posts: [],
+          filteredPosts: [],
+          currentPage: 1,
+          postsPerPage: 6,
+          currentTopic: 'all',
+          currentPost: null,
+          firebaseListeners: {},
+          // Thêm các hàm hỗ trợ này vào communityHandler
+          getCommentAuthor(comment, index) {
+            // Có thể mở rộng để lấy tên từ dữ liệu phức tạp hơn
+            const defaultNames = [
+              'Minh Anh',
+              'Tuấn Anh',
+              'Lan Hương',
+              'Hoàng Nam',
+              'Mai Linh',
+              'Quang Huy',
+              'Thùy Linh',
+              'Văn Hải',
+              'Kim Chi',
+              'Bảo Ngọc',
+              'Quốc Khánh',
+              'Mỹ Hạnh',
+            ];
+            return defaultNames[index % defaultNames.length] || 'Thành viên';
+          },
+
+          getUserInitial(comment) {
+            // Lấy chữ cái đầu từ comment hoặc từ tên người dùng
+            return comment.charAt(0).toUpperCase();
+          },
+
+          formatCommentTime(index) {
+            const times = [
+              '2 phút trước',
+              '5 phút trước',
+              '10 phút trước',
+              '15 phút trước',
+              '30 phút trước',
+              '1 giờ trước',
+              '2 giờ trước',
+              '3 giờ trước',
+              '5 giờ trước',
+              '1 ngày trước',
+              '2 ngày trước',
+              '3 ngày trước',
+            ];
+            return times[index] || 'Vừa xong';
+          },
+
+          // Load posts from Firebase
+          async loadPosts() {
+            try {
+              document
+                .getElementById('community-loading')
+                .classList.remove('hidden');
+              document
+                .getElementById('posts-container')
+                .classList.add('hidden');
+              document
+                .getElementById('no-posts-message')
+                .classList.add('hidden');
+              document.getElementById('pagination').classList.add('hidden');
+
+              // Remove existing listeners
+              this.removeFirebaseListeners();
+
+              // Set up realtime listener for posts
+              this.firebaseListeners.posts = app.dataHandler.listenToPosts(
+                (postsData) => {
+                  if (postsData) {
+                    // Convert Firebase object to array
+                    this.posts = Object.entries(postsData)
+                      .map(([id, post]) => ({
+                        id,
+                        ...post,
+                      }))
+                      .sort((a, b) => b.createdAt - a.createdAt);
+                  } else {
+                    this.posts = [];
+                  }
+
+                  this.filterPosts();
+                  this.renderPosts();
+                  document
+                    .getElementById('community-loading')
+                    .classList.add('hidden');
+                },
+                'createdAt',
+                100
+              );
+            } catch (error) {
+              console.error('Error loading posts from Firebase:', error);
+              this.posts = this.generateSamplePosts();
+              this.filterPosts();
+              this.renderPosts();
+              document
+                .getElementById('community-loading')
+                .classList.add('hidden');
+              app.uiHandler.showNotification(
+                'Không thể tải bài viết từ cộng đồng, đang hiển thị dữ liệu mẫu.',
+                'warning'
+              );
+            }
+          },
+
+          // Remove Firebase listeners
+          removeFirebaseListeners() {
+            Object.values(this.firebaseListeners).forEach((unsubscribe) => {
+              if (unsubscribe) unsubscribe();
+            });
+            this.firebaseListeners = {};
+          },
+
+          // Generate sample posts (chỉ sử dụng khi không có dữ liệu từ Firebase)
+          generateSamplePosts() {
+            const samplePosts = [
+              {
+                id: 'post_1',
+                title: 'Hành trình giảm 10kg trong 3 tháng',
+                content:
+                  'Mình đã giảm được 10kg chỉ trong 3 tháng bằng cách kết hợp chế độ ăn kiêng và tập luyện đều đặn. Cảm thấy tự tin và khỏe mạnh hơn rất nhiều!',
+                topic: 'Giảm cân',
+                tip: 'Uống đủ nước và ngủ đủ giấc là chìa khóa quan trọng',
+                progress: 100,
+                user: {
+                  name: 'Minh Anh',
+                  avatar: 'M',
+                  color: '#667eea',
+                },
+                likes: 42,
+                comments_count: 48,
+                userLikes: {},
+                comments: this.generateSampleComments(48),
+                createdAt: new Date('2025-01-15T08:30:00Z').getTime(),
+                tag_icon: 'fas fa-minus-circle',
+              },
+              {
+                id: 'post_2',
+                title: 'Tăng 5kg cơ bắp sau 4 tháng tập luyện',
+                content:
+                  'Sau 4 tháng kiên trì tập gym và ăn uống khoa học, mình đã tăng được 5kg cơ bắp. Cơ thể săn chắc và khỏe mạnh hơn rất nhiều.',
+                topic: 'Tăng cơ',
+                tip: 'Tập trung vào compound exercises và ăn đủ protein',
+                progress: 100,
+                user: {
+                  name: 'Tuấn Anh',
+                  avatar: 'T',
+                  color: '#764ba2',
+                },
+                likes: 47,
+                comments_count: 45,
+                userLikes: {},
+                comments: this.generateSampleComments(45),
+                createdAt: new Date('2025-01-12T14:20:00Z').getTime(),
+                tag_icon: 'fas fa-heartbeat',
+              },
+              {
+                id: 'post_3',
+                title: 'Thực đơn eat clean giúp tôi khỏe mạnh hơn',
+                content:
+                  'Áp dụng chế độ eat clean trong 2 tháng, mình cảm thấy cơ thể nhẹ nhàng, da dẻ đẹp hơn và có nhiều năng lượng hơn cho công việc.',
+                topic: 'Dinh dưỡng',
+                tip: 'Chuẩn bị thức ăn trước cho cả tuần để tiết kiệm thời gian',
+                progress: 85,
+                user: {
+                  name: 'Lan Hương',
+                  avatar: 'L',
+                  color: '#f093fb',
+                },
+                likes: 38,
+                comments_count: 42,
+                userLikes: {},
+                comments: this.generateSampleComments(42),
+                createdAt: new Date('2025-01-10T10:15:00Z').getTime(),
+                tag_icon: 'fas fa-apple-alt',
+              },
+              {
+                id: 'post_4',
+                title: 'Từ gầy ốm đến body cân đối',
+                content:
+                  'Từ 48kg lên 60kg, hành trình tăng cân của mình đầy thử thách nhưng rất đáng giá. Chia sẻ kinh nghiệm cho những ai đang muốn tăng cân lành mạnh.',
+                topic: 'Tăng cân',
+                tip: 'Ăn nhiều bữa nhỏ trong ngày và tập thể dục đều đặn',
+                progress: 90,
+                user: {
+                  name: 'Hoàng Nam',
+                  avatar: 'H',
+                  color: '#4facfe',
+                },
+                likes: 51,
+                comments_count: 49,
+                userLikes: {},
+                comments: this.generateSampleComments(49),
+                createdAt: new Date('2025-01-08T16:45:00Z').getTime(),
+                tag_icon: 'fas fa-plus-circle',
+              },
+              {
+                id: 'post_5',
+                title: 'Yoga mỗi ngày - Cuộc sống cân bằng',
+                content:
+                  'Tập yoga 30 phút mỗi sáng đã thay đổi hoàn toàn cuộc sống của mình. Giảm căng thẳng, cải thiện sức khỏe và tìm thấy sự bình yên trong tâm hồn.',
+                topic: 'Giảm cân',
+                tip: 'Bắt đầu với các tư thế cơ bản và tăng dần độ khó',
+                progress: 75,
+                user: {
+                  name: 'Mai Linh',
+                  avatar: 'M',
+                  color: '#00f2fe',
+                },
+                likes: 44,
+                comments_count: 41,
+                userLikes: {},
+                comments: this.generateSampleComments(41),
+                createdAt: new Date('2025-01-05T09:30:00Z').getTime(),
+                tag_icon: 'fas fa-minus-circle',
+              },
+              {
+                id: 'post_6',
+                title: 'Bí quyết dinh dưỡng cho người bận rộn',
+                content:
+                  'Làm việc văn phòng 8 tiếng/ngày không còn là rào cản để có chế độ ăn uống lành mạnh. Chia sẻ thực đơn nhanh-gọn-dinh dưỡng cho dân văn phòng.',
+                topic: 'Dinh dưỡng',
+                tip: 'Chuẩn bị meal prep vào cuối tuần để tiết kiệm thời gian',
+                progress: 80,
+                user: {
+                  name: 'Quang Huy',
+                  avatar: 'Q',
+                  color: '#f5576c',
+                },
+                likes: 39,
+                comments_count: 43,
+                userLikes: {},
+                comments: this.generateSampleComments(43),
+                createdAt: new Date('2025-01-03T13:20:00Z').getTime(),
+                tag_icon: 'fas fa-apple-alt',
+              },
+            ];
+
+            return samplePosts;
+          },
+
+          // Generate sample comments
+          generateSampleComments(count) {
+            const sampleUsers = [
+              'Minh Tuấn',
+              'Lan Anh',
+              'Hồng Nhung',
+              'Đức Anh',
+              'Thùy Linh',
+              'Văn Hải',
+              'Kim Chi',
+              'Bảo Ngọc',
+              'Quốc Khánh',
+              'Mỹ Hạnh',
+              'Thanh Tùng',
+              'Ngọc Trinh',
+              'Hữu Phúc',
+              'Thu Thảo',
+              'Mạnh Cường',
+              'Phương Thảo',
+              'Việt Hùng',
+              'Bích Ngọc',
+              'Anh Khoa',
+              'Hà Phương',
+            ];
+
+            const sampleComments = [
+              'Bài viết rất hữu ích! Cảm ơn bạn đã chia sẻ.',
+              'Mình cũng đang trên hành trình tương tự, cảm ơn vì đã truyền cảm hứng!',
+              'Bạn có thể chia sẻ chi tiết hơn về chế độ ăn được không?',
+              'Thật tuyệt vời! Mình sẽ thử áp dụng ngay.',
+              'Cảm ơn vì những lời khuyên quý giá!',
+              'Mình đã làm theo và thấy kết quả rõ rệt sau 2 tuần.',
+              'Bạn dùng app nào để theo dõi calorie vậy?',
+              'Hình ảnh trước và sau của bạn thật ấn tượng!',
+              'Mình thích cách bạn tiếp cận vấn đề một cách khoa học.',
+              'Có lời khuyên nào cho người mới bắt đầu không?',
+              'Bạn tập ở phòng gym nào vậy?',
+              'Mình cũng muốn thử nhưng sợ không kiên trì được.',
+              'Cảm ơn vì đã chia sẻ kinh nghiệm thực tế!',
+              'Bạn có gặp khó khăn gì trong quá trình này không?',
+              'Mình sẽ chia sẻ bài viết này cho bạn bè!',
+              'Thật đáng ngưỡng mộ! Chúc mừng thành công của bạn.',
+              'Bạn có thể recommend vài món ăn healthy không?',
+              'Mình thấy có động lực hơn sau khi đọc bài viết này.',
+              'Cảm ơn vì những tips rất thực tế!',
+              'Bạn có lời khuyên nào để vượt qua giai đoạn plateau?',
+            ];
+
+            const comments = [];
+            for (let i = 0; i < count; i++) {
+              const randomUser =
+                sampleUsers[Math.floor(Math.random() * sampleUsers.length)];
+              const randomComment =
+                sampleComments[
+                  Math.floor(Math.random() * sampleComments.length)
+                ];
+
+              comments.push({
+                id: 'comment_' + i,
+                text: randomComment,
+                user: randomUser,
+                userId: 'user_' + Math.floor(Math.random() * 1000),
+                createdAt: new Date(
+                  Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000
+                ).getTime(),
+              });
+            }
+
+            return comments;
+          },
+
+          // Filter posts by topic
+          filterPosts() {
+            if (this.currentTopic === 'all') {
+              this.filteredPosts = [...this.posts];
+            } else {
+              this.filteredPosts = this.posts.filter(
+                (post) => post.topic === this.currentTopic
+              );
+            }
+            this.currentPage = 1;
+          },
+
+          // Render posts with pagination
+          renderPosts() {
+            const container = document.getElementById('posts-container');
+            const noPostsMessage = document.getElementById('no-posts-message');
+            const pagination = document.getElementById('pagination');
+
+            if (this.filteredPosts.length === 0) {
+              container.classList.add('hidden');
+              noPostsMessage.classList.remove('hidden');
+              pagination.classList.add('hidden');
+              return;
+            }
+
+            container.classList.remove('hidden');
+            noPostsMessage.classList.add('hidden');
+            pagination.classList.remove('hidden');
+
+            // Calculate pagination
+            const startIndex = (this.currentPage - 1) * this.postsPerPage;
+            const endIndex = startIndex + this.postsPerPage;
+            const postsToShow = this.filteredPosts.slice(startIndex, endIndex);
+
+            container.innerHTML = '';
+
+            postsToShow.forEach((post, index) => {
+              const postElement = this.createPostElement(post, index);
+              container.appendChild(postElement);
+            });
+
+            this.updatePagination();
+          },
+
+          // Create individual post element
+          // Thay thế hàm createPostElement hiện tại bằng hàm này
+          createPostElement(post, index) {
+            const postDiv = document.createElement('div');
+            postDiv.className = `post-card bg-white dark:bg-gray-700 rounded-2xl p-6 shadow-md animate-slide-up`;
+            postDiv.style.animationDelay = `${index * 0.1}s`;
+
+            const progressColor = this.getProgressColor(post.topic);
+            const progressStyle = `width: ${
+              post.progress || 0
+            }%; background: ${progressColor};`;
+
+            postDiv.innerHTML = `
+    <div class="flex items-center mb-4">
+      <div class="post-avatar mr-3" style="background: ${
+        post.user?.color || '#667eea'
+      }">
+        ${post.user?.avatar || 'U'}
+      </div>
+      <div class="flex-1">
+        <p class="font-bold text-gray-800 dark:text-white text-sm">
+          ${post.user?.name || 'Người dùng'}
+        </p>
+        <p class="text-gray-500 dark:text-gray-400 text-xs">
+          ${this.formatTimeAgo(post.createdAt)}
+        </p>
+      </div>
+      <span class="topic-badge px-2 py-1 text-xs" style="${this.getTopicStyle(
+        post.topic
+      )}">
+        <i class="${post.tag_icon || 'fas fa-heart'} mr-1"></i>${post.topic}
+      </span>
+    </div>
+
+    <div class="mb-4">
+      <h4 class="font-bold text-gray-800 dark:text-white mb-2">
+        ${post.title}
+      </h4>
+      <p class="text-gray-600 dark:text-gray-300 text-sm leading-relaxed mb-3">
+        ${post.content}
+      </p>
+      ${
+        post.tip
+          ? `
+        <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg text-sm text-gray-700 dark:text-gray-300">
+          <strong>💡 Cách hoàn thành:</strong> ${post.tip}
+        </div>
+      `
+          : ''
+      }
+    </div>
+
+    <div class="progress-bar-container mb-4">
+      <div class="progress-bar-fill" style="${progressStyle}"></div>
+    </div>
+
+    <div class="flex justify-between items-center text-sm text-gray-600 dark:text-gray-400">
+      <div class="flex space-x-4">
+        <button class="like-btn flex items-center hover:text-red-500 transition-colors" data-post-id="${
+          post.id
+        }">
+          <i class="far fa-heart mr-1"></i>
+          <span class="likes-count">${post.likes || 0}</span>
+        </button>
+        <button class="comment-btn flex items-center hover:text-blue-500 transition-colors" data-post-id="${
+          post.id
+        }">
+          <i class="far fa-comment mr-1"></i>
+          <span class="comments-count">${post.comments_count || 0}</span>
+        </button>
+      </div>
+    </div>
+  `;
+
+            // Add click event to open modal khi click vào post
+            postDiv.addEventListener('click', (e) => {
+              if (!e.target.closest('button')) {
+                this.openPostModal(post);
+              }
+            });
+
+            // Add like button functionality
+            const likeBtn = postDiv.querySelector('.like-btn');
+            likeBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              this.handleLike(post.id, likeBtn);
+            });
+
+            // Add comment button functionality - MỞ MODAL KHI NHẤN ICON COMMENT
+            const commentBtn = postDiv.querySelector('.comment-btn');
+            commentBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              this.openPostModal(post);
+            });
+
+            return postDiv;
+          },
+
+          // Set up realtime listeners for a post
+          setupPostRealtimeListeners(post) {
+            // Listen for likes updates
+            this.firebaseListeners[`likes_${post.id}`] =
+              app.dataHandler.listenToLikes(post.id, (likesData) => {
+                const likesCount = Object.keys(likesData || {}).length;
+
+                // Update likes count in post card
+                const postElement = document.querySelector(
+                  `[data-post-id="${post.id}"]`
+                );
+                if (postElement) {
+                  const likesCountElement =
+                    postElement.querySelector('.likes-count');
+                  if (likesCountElement) {
+                    likesCountElement.textContent = likesCount;
+                  }
+                }
+
+                // Update likes count in modal if open
+                if (this.currentPost && this.currentPost.id === post.id) {
+                  document.getElementById('modal-likes-count').textContent =
+                    likesCount;
+                }
+
+                // Update post in local array
+                const postIndex = this.posts.findIndex((p) => p.id === post.id);
+                if (postIndex !== -1) {
+                  this.posts[postIndex].likes = likesCount;
+                }
+              });
+
+            // Listen for comments updates
+            this.firebaseListeners[`comments_${post.id}`] =
+              app.dataHandler.listenToComments(post.id, (commentsData) => {
+                const commentsCount = Object.keys(commentsData || {}).length;
+
+                // Update comments count in post card
+                const postElement = document.querySelector(
+                  `[data-post-id="${post.id}"]`
+                );
+                if (postElement) {
+                  const commentsCountElement =
+                    postElement.querySelector('.comments-count');
+                  if (commentsCountElement) {
+                    commentsCountElement.textContent = commentsCount;
+                  }
+                }
+
+                // Update comments count in modal if open
+                if (this.currentPost && this.currentPost.id === post.id) {
+                  document.getElementById('modal-comments-count').textContent =
+                    commentsCount;
+                  this.loadComments(this.currentPost);
+                }
+
+                // Update post in local array
+                const postIndex = this.posts.findIndex((p) => p.id === post.id);
+                if (postIndex !== -1) {
+                  this.posts[postIndex].comments_count = commentsCount;
+                }
+              });
+          },
+
+          // Update pagination controls
+          updatePagination() {
+            const totalPages = Math.ceil(
+              this.filteredPosts.length / this.postsPerPage
+            );
+            const pageInfo = document.getElementById('page-info');
+            const prevBtn = document.getElementById('prev-page');
+            const nextBtn = document.getElementById('next-page');
+
+            pageInfo.textContent = `Trang ${this.currentPage} / ${totalPages}`;
+            prevBtn.disabled = this.currentPage === 1;
+            nextBtn.disabled = this.currentPage === totalPages;
+
+            // Add event listeners
+            prevBtn.onclick = () => {
+              if (this.currentPage > 1) {
+                this.currentPage--;
+                this.renderPosts();
+                window.scrollTo({
+                  top: document.getElementById('community').offsetTop - 100,
+                  behavior: 'smooth',
+                });
+              }
+            };
+
+            nextBtn.onclick = () => {
+              if (this.currentPage < totalPages) {
+                this.currentPage++;
+                this.renderPosts();
+                window.scrollTo({
+                  top: document.getElementById('community').offsetTop - 100,
+                  behavior: 'smooth',
+                });
+              }
+            };
+          },
+
+          // Show no posts message
+          showNoPostsMessage() {
+            document.getElementById('posts-container').classList.add('hidden');
+            document
+              .getElementById('no-posts-message')
+              .classList.remove('hidden');
+            document.getElementById('pagination').classList.add('hidden');
+          },
+
+          // Open post modal
+          // Thay thế hàm openPostModal hiện tại bằng hàm này
+          openPostModal(post) {
+            this.currentPost = post;
+            const modal = document.getElementById('post-modal');
+
+            // Set modal content
+            document.getElementById('modal-user-avatar').textContent =
+              post.user?.avatar || 'U';
+            document.getElementById('modal-user-avatar').style.background =
+              post.user?.color || '#667eea';
+            document.getElementById('modal-user-name').textContent =
+              post.user?.name || 'Người dùng';
+            document.getElementById('modal-post-time').textContent =
+              this.formatTimeAgo(post.createdAt);
+            document.getElementById('modal-post-title').textContent =
+              post.title;
+            document.getElementById('modal-post-content').textContent =
+              post.content;
+
+            // Set topic badge
+            const topicBadge = document.getElementById('modal-topic');
+            topicBadge.innerHTML = `
+    <span class="topic-badge px-2 py-1 text-xs" style="${this.getTopicStyle(
+      post.topic
+    )}">
+      <i class="${post.tag_icon || 'fas fa-heart'} mr-1"></i>${post.topic}
+    </span>
+  `;
+
+            // Set tip if exists
+            const tipContainer = document.getElementById('modal-post-tip');
+            if (post.tip) {
+              tipContainer.classList.remove('hidden');
+              document.getElementById('modal-tip-content').textContent =
+                post.tip;
+            } else {
+              tipContainer.classList.add('hidden');
+            }
+
+            // Set progress bar
+            const progressBar = document.getElementById('modal-progress-bar');
+            progressBar.style.width = `${post.progress || 0}%`;
+            progressBar.style.background = this.getProgressColor(post.topic);
+
+            // Set counts
+            document.getElementById('modal-likes-count').textContent =
+              post.likes || 0;
+            document.getElementById('modal-comments-count').textContent =
+              post.comments_count || 0;
+
+            // Update like button state in modal
+            const modalLikeBtn = document.getElementById('modal-like-btn');
+            const modalHeartIcon = modalLikeBtn.querySelector('i');
+
+            // Kiểm tra trạng thái like từ post card
+            const postCardLikeBtn = document.querySelector(
+              `[data-post-id="${post.id}"] .like-btn`
+            );
+            if (postCardLikeBtn) {
+              const postCardHeartIcon = postCardLikeBtn.querySelector('i');
+              if (postCardHeartIcon.classList.contains('fas')) {
+                modalHeartIcon.classList.remove('far');
+                modalHeartIcon.classList.add('fas', 'text-red-500');
+              } else {
+                modalHeartIcon.classList.remove('fas', 'text-red-500');
+                modalHeartIcon.classList.add('far');
+              }
+            }
+
+            // Load comments từ JSON data
+            this.loadComments(post);
+
+            // Show modal
+            modal.classList.remove('hidden');
+            modal.classList.add('flex', 'show');
+            document.body.style.overflow = 'hidden';
+          },
+
+          // Close post modal
+          closePostModal() {
+            const modal = document.getElementById('post-modal');
+            modal.classList.remove('show');
+            setTimeout(() => {
+              modal.classList.add('hidden');
+              modal.classList.remove('flex');
+              document.body.style.overflow = '';
+              this.currentPost = null;
+            }, 200);
+          },
+
+          // Handle like functionality with Firebase
+          // Thay thế hàm handleLike hiện tại bằng hàm này
+          handleLike(postId, likeBtn) {
+            const heartIcon = likeBtn.querySelector('i');
+            const likesCountElement = likeBtn.querySelector('.likes-count');
+
+            // Lấy số like hiện tại
+            const currentLikes = parseInt(likesCountElement.textContent) || 0;
+
+            if (heartIcon.classList.contains('fas')) {
+              // Đang liked -> unlike
+              heartIcon.classList.remove('fas', 'text-red-500');
+              heartIcon.classList.add('far');
+              likesCountElement.textContent = Math.max(0, currentLikes - 1);
+              app.uiHandler.showNotification('Đã bỏ thích bài viết', 'success');
+            } else {
+              // Chưa liked -> like
+              heartIcon.classList.remove('far');
+              heartIcon.classList.add('fas', 'text-red-500');
+              likesCountElement.textContent = currentLikes + 1;
+              app.uiHandler.showNotification('Đã thích bài viết!', 'success');
+            }
+
+            // Cập nhật trong modal nếu đang mở
+            if (this.currentPost && this.currentPost.id === postId) {
+              document.getElementById('modal-likes-count').textContent =
+                likesCountElement.textContent;
+
+              // Cập nhật icon like trong modal
+              const modalLikeBtn = document.getElementById('modal-like-btn');
+              const modalHeartIcon = modalLikeBtn.querySelector('i');
+              if (heartIcon.classList.contains('fas')) {
+                modalHeartIcon.classList.remove('far');
+                modalHeartIcon.classList.add('fas', 'text-red-500');
+              } else {
+                modalHeartIcon.classList.remove('fas', 'text-red-500');
+                modalHeartIcon.classList.add('far');
+              }
+            }
+
+            // Cập nhật dữ liệu local
+            const postIndex = this.posts.findIndex((p) => p.id === postId);
+            if (postIndex !== -1) {
+              this.posts[postIndex].likes = parseInt(
+                likesCountElement.textContent
+              );
+            }
+          },
+
+          // Load comments for a post from Firebase
+          // Thay thế hàm loadComments hiện tại bằng hàm này
+          // Phiên bản đơn giản - không có animation delay
+          loadComments(post) {
+            const commentsContainer =
+              document.getElementById('comments-container');
+
+            // Kiểm tra nếu post có comments trong JSON
+            if (post.comments && post.comments.length > 0) {
+              commentsContainer.innerHTML = post.comments
+                .map(
+                  (comment, index) => `
+      <div class="comment-item bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+        <div class="flex items-start space-x-3">
+          <div class="comment-avatar">
+            ${this.getUserInitial(comment)}
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex justify-between items-start mb-2">
+              <span class="font-semibold text-sm text-gray-800 dark:text-white">
+                ${this.getCommentAuthor(comment, index)}
+              </span>
+              <span class="text-xs text-gray-500 dark:text-gray-400">
+                ${this.formatCommentTime(index)}
+              </span>
+            </div>
+            <p class="text-gray-600 dark:text-gray-300 text-sm leading-relaxed break-words">
+              ${comment}
+            </p>
+          </div>
+        </div>
+      </div>
+    `
+                )
+                .join('');
+            } else {
+              commentsContainer.innerHTML = `
+      <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+        <i class="far fa-comment-dots text-3xl mb-3"></i>
+        <p>Chưa có bình luận nào</p>
+        <p class="text-sm mt-1">Hãy là người đầu tiên bình luận!</p>
+      </div>
+    `;
+            }
+          },
+
+          // Submit comment to Firebase
+          async submitComment() {
+            const commentInput = document.getElementById('comment-input');
+            const commentText = commentInput.value.trim();
+
+            if (!commentText) return;
+
+            // Get current user
+            const user = app.dataHandler.getUserData();
+            if (!user) {
+              app.uiHandler.showNotification(
+                'Vui lòng đăng nhập để bình luận',
+                'warning'
+              );
+              return;
+            }
+
+            if (!this.currentPost) return;
+
+            try {
+              // Create new comment
+              const newComment = {
+                text: commentText,
+                user: user.name || 'Người dùng',
+                userId: user.userId,
+              };
+
+              // Save comment to Firebase
+              await app.dataHandler.saveComment(
+                this.currentPost.id,
+                newComment
+              );
+
+              // Clear input
+              commentInput.value = '';
+
+              // Show notification
+              app.uiHandler.showNotification('Đã thêm bình luận', 'success');
+
+              // Scroll to bottom
+              const commentsContainer =
+                document.getElementById('comments-container');
+              commentsContainer.scrollTop = commentsContainer.scrollHeight;
+            } catch (error) {
+              console.error('Error submitting comment:', error);
+              app.uiHandler.showNotification(
+                'Có lỗi xảy ra khi đăng bình luận',
+                'error'
+              );
+            }
+          },
+
+          // Delete comment from Firebase
+          async deleteComment(postId, commentId) {
+            try {
+              await app.dataHandler.deleteComment(postId, commentId);
+              app.uiHandler.showNotification('Đã xóa bình luận', 'success');
+            } catch (error) {
+              console.error('Error deleting comment:', error);
+              app.uiHandler.showNotification(
+                'Có lỗi xảy ra khi xóa bình luận',
+                'error'
+              );
+            }
+          },
+
+          // Open create post modal
+          openCreatePostModal() {
+            const user = app.dataHandler.getUserData();
+            if (!user) {
+              app.uiHandler.showNotification(
+                'Vui lòng đăng nhập để chia sẻ bài viết',
+                'warning'
+              );
+              setTimeout(() => {
+                window.location.href = 'login.html';
+              }, 1500);
+              return;
+            }
+
+            const modal = document.getElementById('create-post-modal');
+
+            // Reset form
+            document.getElementById('post-title').value = '';
+            document.getElementById('post-content').value = '';
+            document.getElementById('post-tip').value = '';
+            document.getElementById('post-progress').value = '0';
+            document.getElementById('progress-value').textContent = '0%';
+
+            // Show modal
+            modal.classList.remove('hidden');
+            modal.classList.add('flex', 'show');
+            document.body.style.overflow = 'hidden';
+          },
+
+          // Close create post modal
+          closeCreatePostModal() {
+            const modal = document.getElementById('create-post-modal');
+            modal.classList.remove('show');
+            setTimeout(() => {
+              modal.classList.add('hidden');
+              modal.classList.remove('flex');
+              document.body.style.overflow = '';
+            }, 200);
+          },
+
+          // Submit new post to Firebase
+          async submitPost() {
+            const title = document.getElementById('post-title').value.trim();
+            const content = document
+              .getElementById('post-content')
+              .value.trim();
+            const topic = document.getElementById('post-topic').value;
+            const tip = document.getElementById('post-tip').value.trim();
+            const progress = parseInt(
+              document.getElementById('post-progress').value
+            );
+
+            if (!title || !content) {
+              app.uiHandler.showNotification(
+                'Vui lòng nhập tiêu đề và nội dung',
+                'warning'
+              );
+              return;
+            }
+
+            // Get current user
+            const user = app.dataHandler.getUserData();
+            if (!user) return;
+
+            try {
+              // Create new post
+              const newPost = {
+                title: title,
+                content: content,
+                topic: topic,
+                tip: tip || '',
+                progress: progress,
+                user: {
+                  name: user.name || 'Người dùng',
+                  avatar: (user.name || 'U').charAt(0).toUpperCase(),
+                  color: this.getRandomColor(),
+                },
+                likes: 0,
+                comments_count: 0,
+              };
+
+              // Save post to Firebase
+              await app.dataHandler.savePost(newPost);
+
+              // Show notification
+              app.uiHandler.showNotification(
+                'Bài viết đã được đăng thành công!',
+                'success'
+              );
+
+              // Close modal
+              this.closeCreatePostModal();
+            } catch (error) {
+              console.error('Error submitting post:', error);
+              app.uiHandler.showNotification(
+                'Có lỗi xảy ra khi đăng bài viết',
+                'error'
+              );
+            }
+          },
+
+          // Utility functions
+          formatTimeAgo(timestamp) {
+            if (!timestamp) return 'Vừa xong';
+
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+
+            if (diffMins < 1) return 'Vừa xong';
+            if (diffMins < 60) return `${diffMins} phút trước`;
+            if (diffHours < 24) return `${diffHours} giờ trước`;
+            if (diffDays < 7) return `${diffDays} ngày trước`;
+
+            return date.toLocaleDateString('vi-VN');
+          },
+
+          getTopicStyle(topic) {
+            const styles = {
+              'Giảm cân':
+                'background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3);',
+              'Tăng cơ':
+                'background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3);',
+              'Dinh dưỡng':
+                'background: rgba(249, 115, 22, 0.1); color: #f97316; border: 1px solid rgba(249, 115, 22, 0.3);',
+              'Tăng cân':
+                'background: rgba(139, 92, 246, 0.1); color: #8b5cf6; border: 1px solid rgba(139, 92, 246, 0.3);',
+            };
+            return (
+              styles[topic] ||
+              'background: rgba(107, 114, 128, 0.1); color: #6b7280; border: 1px solid rgba(107, 114, 128, 0.3);'
+            );
+          },
+
+          getProgressColor(topic) {
+            const colors = {
+              'Giảm cân': 'linear-gradient(90deg, #10b981 0%, #059669 100%)',
+              'Tăng cơ': 'linear-gradient(90deg, #3b82f6 0%, #1e40af 100%)',
+              'Dinh dưỡng': 'linear-gradient(90deg, #f97316 0%, #ea580c 100%)',
+              'Tăng cân': 'linear-gradient(90deg, #8b5cf6 0%, #6d28d9 100%)',
+            };
+            return (
+              colors[topic] ||
+              'linear-gradient(90deg, #667eea 0%, #764ba2 100%)'
+            );
+          },
+
+          getRandomColor() {
+            const colors = [
+              '#667eea',
+              '#764ba2',
+              '#f093fb',
+              '#f5576c',
+              '#4facfe',
+              '#00f2fe',
+            ];
+            return colors[Math.floor(Math.random() * colors.length)];
+          },
+
+          // Initialize community features
+          init() {
+            this.setupEventListeners();
+            this.loadPosts();
+          },
+
+          // Setup event listeners
+          // Thêm vào hàm setupEventListeners (nếu chưa có)
+          setupEventListeners() {
+            // Filter buttons
+            document.querySelectorAll('.filter-btn').forEach((btn) => {
+              btn.addEventListener('click', () => {
+                document
+                  .querySelectorAll('.filter-btn')
+                  .forEach((b) => b.classList.remove('active'));
+                btn.classList.add('active');
+                this.currentTopic = btn.dataset.topic;
+                this.filterPosts();
+                this.renderPosts();
+              });
+            });
+
+            // Modal close buttons
+            document
+              .getElementById('modal-close')
+              .addEventListener('click', () => {
+                this.closePostModal();
+              });
+
+            document
+              .getElementById('create-post-close')
+              .addEventListener('click', () => {
+                this.closeCreatePostModal();
+              });
+
+            document
+              .getElementById('cancel-post')
+              .addEventListener('click', () => {
+                this.closeCreatePostModal();
+              });
+
+            // Modal backdrop clicks
+            document
+              .getElementById('post-modal')
+              .addEventListener('click', (e) => {
+                if (e.target === document.getElementById('post-modal')) {
+                  this.closePostModal();
+                }
+              });
+
+            document
+              .getElementById('create-post-modal')
+              .addEventListener('click', (e) => {
+                if (e.target === document.getElementById('create-post-modal')) {
+                  this.closeCreatePostModal();
+                }
+              });
+
+            // Modal like button
+            document
+              .getElementById('modal-like-btn')
+              .addEventListener('click', () => {
+                if (this.currentPost) {
+                  const likeBtn = document.querySelector(
+                    `[data-post-id="${this.currentPost.id}"] .like-btn`
+                  );
+                  if (likeBtn) {
+                    this.handleLike(this.currentPost.id, likeBtn);
+                  }
+                }
+              });
+
+            // Comment submission (nếu muốn giữ tính năng thêm comment mới)
+            document
+              .getElementById('submit-comment')
+              .addEventListener('click', () => {
+                this.submitComment();
+              });
+
+            document
+              .getElementById('comment-input')
+              .addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                  this.submitComment();
+                }
+              });
+
+            // Post submission
+            document
+              .getElementById('submit-post')
+              .addEventListener('click', () => {
+                this.submitPost();
+              });
+
+            // Progress slider
+            document
+              .getElementById('post-progress')
+              .addEventListener('input', (e) => {
+                document.getElementById('progress-value').textContent =
+                  e.target.value + '%';
+              });
+          },
+        },
+
+        // Initialize the application
+        init() {
+          // Check authentication status and update UI
+          const user = this.authHandler.checkAuthStatus();
+          this.uiHandler.updateUserUI(user);
+
+          // Initialize UI components
+          this.uiHandler.initDarkMode();
+          this.uiHandler.initUserMenu();
+          this.uiHandler.initBackToTop();
+          this.uiHandler.initSmoothScrolling();
+
+          // Set up navigation event listeners
+          document.getElementById('login-btn').addEventListener('click', () => {
+            window.location.href = 'login.html';
+          });
+
+          document
+            .getElementById('register-btn')
+            .addEventListener('click', () => {
+              window.location.href = 'register.html';
+            });
+
+          document
+            .getElementById('logout-btn')
+            .addEventListener('click', () => {
+              this.authHandler.logout();
+            });
+
+          // Show welcome notification if user is logged in
+          if (user) {
+            this.uiHandler.showNotification(
+              `Chào mừng trở lại, ${user.name}!`,
+              'success'
+            );
+          }
+
+          // Initialize community
+          this.communityHandler.init();
+
+          // Performance optimization: Lazy load images
+          this.lazyLoadImages();
+
+          console.log(
+            'HealthyLife application initialized successfully with Firebase'
+          );
+        },
+
+        // Lazy load images for performance
+        lazyLoadImages() {
+          const images = document.querySelectorAll('img[data-src]');
+          const imageObserver = new IntersectionObserver(
+            (entries, observer) => {
+              entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                  const img = entry.target;
+                  img.src = img.dataset.src;
+                  img.classList.remove('lazy');
+                  imageObserver.unobserve(img);
+                }
+              });
+            }
+          );
+
+          images.forEach((img) => imageObserver.observe(img));
+        },
+      };
+
+      // ===== INITIALIZE APPLICATION WHEN DOM IS LOADED =====
+      document.addEventListener('DOMContentLoaded', () => {
+        app.init();
+      });
+
+      // ===== ERROR HANDLING =====
+      window.addEventListener('error', (e) => {
+        console.error('Global error caught:', e.error);
+        app.uiHandler.showNotification(
+          'Đã xảy ra lỗi. Vui lòng thử lại!',
+          'error'
+        );
+      });
+
+      // Handle unhandled promise rejections
+      window.addEventListener('unhandledrejection', (e) => {
+        console.error('Unhandled promise rejection:', e.reason);
+        app.uiHandler.showNotification(
+          'Đã xảy ra lỗi. Vui lòng thử lại!',
+          'error'
+        );
+        e.preventDefault();
+      });
+
+      // User Menu Toggle
+      const userMenuContainer = document.getElementById('user-menu-container');
+      const userAvatar = document.getElementById('user-avatar');
+      const userMenu = document.getElementById('user-menu');
+
+      userAvatar.addEventListener('click', () => {
+        userMenu.classList.toggle('active');
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!userMenuContainer.contains(e.target)) {
+          userMenu.classList.remove('active');
+        }
+      });
+
+      // Dark Mode Toggle
+      const darkModeToggle = document.getElementById('dark-mode-toggle');
+      const htmlElement = document.documentElement;
+
+      darkModeToggle.addEventListener('change', () => {
+        htmlElement.classList.toggle('dark');
+      });
+
+      // Nav Glass Effect on Scroll
+      const navGlass = document.querySelector('.nav-glass');
+      window.addEventListener('scroll', () => {
+        if (window.scrollY > 50) {
+          navGlass.classList.add('scrolled');
+        } else {
+          navGlass.classList.remove('scrolled');
+        }
+      });
+    </script>
+  </body>
+</html>
